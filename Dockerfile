@@ -8,7 +8,7 @@ COPY ["Amaken/Amaken.csproj", "Amaken/"]
 
 RUN dotnet restore "Amaken/Amaken.csproj"
 COPY . .
-WORKDIR "/src/SW.Talmaro.Web"
+WORKDIR "/src/Amaken"
 RUN dotnet build "Amaken.csproj" -c Release -o /app/build
 
 FROM build AS publish
