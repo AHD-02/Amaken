@@ -11,4 +11,10 @@ public class HealthCheckController: ControllerBase
     {
         return Ok();
     }
+    
+    [HttpPost]
+    public IActionResult Post()
+    {
+        return Ok("Posted");
+    }
 }
