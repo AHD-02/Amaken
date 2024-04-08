@@ -128,9 +128,8 @@ namespace Amaken.Controllers
                 Subject = new ClaimsIdentity(new Claim[]
                 {
             new Claim(ClaimTypes.Email, userEmail),
-                    // Add additional claims as needed
                 }),
-                Expires = DateTime.UtcNow.AddHours(1), // Token expiration time (adjust as needed)
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -171,7 +170,7 @@ namespace Amaken.Controllers
             }
 
             return "OK";
-        }
+        } 
         static string CheckEmail (string email) { 
 
             bool isValidEmail = Regex.IsMatch(email, @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$");
