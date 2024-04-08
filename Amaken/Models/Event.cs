@@ -1,0 +1,31 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Amaken.Models
+{
+    public class Event
+    {
+        [Key]
+        public string? EventId { get; set; }
+        [Required]
+        public string? Name { get; set; }
+        [Required]
+        public string? Location { get; set; }
+        [Required]
+        public string? EventType { get; set; }
+        [Required]
+        public string? Description { get; set; }
+        [Required]
+        public DateTime EventStart { get; set; }
+        [Required]
+        public DateTime EventEnd { get; set; }
+        [Required]
+        public double Fees { get; set; }
+        [Required]
+        public string? UserEmail { get; set; }
+
+        
+
+
+    }
+}
