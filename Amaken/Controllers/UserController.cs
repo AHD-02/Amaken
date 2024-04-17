@@ -12,18 +12,15 @@ namespace Amaken.Controllers
 {
     public class UserController : Controller
     {
-        private readonly ApplicationDbContext _context; // Declare ApplicationDbContext field
+        private readonly ApplicationDbContext _context; 
         private readonly IConfiguration _configuration;
 
-        public UserController(ApplicationDbContext context, IConfiguration configuration) // Inject ApplicationDbContext
+        public UserController(ApplicationDbContext context, IConfiguration configuration) 
         {
-            _context = context; // Initialize ApplicationDbContext field
+            _context = context;
             _configuration = configuration;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
+        
         [HttpPost]
         [Route("api/[controller]/CreateUser")]
         public IActionResult CreateUser(User newUser) {    
@@ -115,7 +112,7 @@ namespace Amaken.Controllers
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var randomBytes = new byte[32]; // 32 bytes = 256 bits
+            var randomBytes = new byte[32];
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(randomBytes);
@@ -174,7 +171,7 @@ namespace Amaken.Controllers
         static string CheckEmail (string email) { 
 
             bool isValidEmail = Regex.IsMatch(email, @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$");
-
+            
             if (isValidEmail)
             {
                 return "OK";
