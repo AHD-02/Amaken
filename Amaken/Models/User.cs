@@ -4,9 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amaken.Models
 {
-    public class User 
+    public enum UserStatus
     {
-        
+        OK,
+        Deleted,
+        Suspended
+    }
+    public class User
+    {
+
         [Key]
         public string? Email { get; set; }
         [Required]
@@ -24,6 +30,10 @@ namespace Amaken.Models
         public string? Country { get; set; }
         [Required]
         public string? City { get; set; }
-       
+
+        [Required]
+        public string? Status { get; set; } = "OK";
+
+
     }
 }

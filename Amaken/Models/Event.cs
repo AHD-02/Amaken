@@ -3,6 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amaken.Models
 {
+    public enum EventStatus
+    {
+        OK,
+        Cancelled,
+        Deleted
+    }
     public class Event
     {
         [Key]
@@ -23,8 +29,9 @@ namespace Amaken.Models
         public double Fees { get; set; }
         [Required]
         public string? UserEmail { get; set; }
+        [Required]
+        public string Status { get; set; } = "OK";
 
-        
 
 
     }

@@ -23,14 +23,24 @@ namespace Amaken.Controllers
         
         [HttpPost]
         [Route("api/[controller]/CreateUser")]
-        public IActionResult CreateUser(User newUser) {    
+        public IActionResult CreateUser(User newUser)
+        {
             if (ModelState.IsValid)
             {
+                if (CheckEmail(newUser.Email!) == "OK")
+                {
                     newUser.DateOfBirth = DateTime.SpecifyKind(newUser.DateOfBirth, DateTimeKind.Utc);
+                    newUser.Status = "OK";
                     _context.User.Add(newUser);
                     _context.SaveChanges();
-                var token = GenerateJwtToken(newUser.Email!);
-                return Ok(new { Token = token });
+                    var token = GenerateJwtToken(newUser.Email!);
+                    return Ok(new { Token = token });
+                }
+                else
+                {
+                    return BadRequest("Email format is invalid");
+                }
+
             }
             else
             {
@@ -56,6 +66,7 @@ namespace Amaken.Controllers
                     User.City = newUser.City;
                     User.DateOfBirth = newUser.DateOfBirth;
                     User.Image = newUser.Image;
+                    User.Status = newUser.Status;
                     _context.SaveChanges();
                     return Ok("User has been updated");
                 }
@@ -78,34 +89,44 @@ namespace Amaken.Controllers
 
             if (user != null)
             {
-                var token = GenerateJwtToken(user.Email!);
+                if (user.Status=="OK")
+                {
+                    var token = GenerateJwtToken(user.Email!);
 
-                return Ok(new { Token = token });
+                    return Ok(new { Token = token });
+                }
+                else
+                {
+                    return BadRequest("User account isn't accessable");
+                }
             }
             else
             {
                 return Unauthorized("Invalid email or password");
             }
         }
-        [HttpDelete]
-        [Route("api/[controller]/DeleteUser")]
-        public IActionResult DeleteUser(string Email)
+        [HttpPut]
+        [Route("api/[controller]/TriggerUserStatus")]
+        public IActionResult TriggerUserStatus (string email, string newStatus)
         {
-            if (ModelState.IsValid) {var User = _context.User.FirstOrDefault(u => u.Email!.ToLower().Equals(Email.ToLower()));
+            var User = _context.User.FirstOrDefault(u => u.Email!.ToLower().Equals(email.ToLower()));
             if(User != null)
             {
-                _context.User.Remove(User);
-                _context.SaveChanges();
-                return Ok("User was deleted successfully");
+                if(Enum.IsDefined(typeof(UserStatus), newStatus))
+                {
+                    User.Status=newStatus;
+                    _context.SaveChanges();
+                    return Ok("User status triggered to " + newStatus);
+                }
+                else
+                {
+                    return BadRequest("Status is undefined");
+                }
             }
-            else {
-                return NotFound("User wasn't found");
-            } }
             else
             {
-                return BadRequest("Data is invalid");
+                return BadRequest("User wasn't found");
             }
-            
         }
 
         static private string GenerateJwtToken(string userEmail)
@@ -140,9 +161,9 @@ namespace Amaken.Controllers
         {
             var Users = _context.User.ToList();
 
-            return Ok(Users); 
+            return Ok(Users);
         }
-        static string CheckPassword (string password)
+        /*static string CheckPassword(string password)
         {
             if (String.IsNullOrEmpty(password))
             {
@@ -167,8 +188,9 @@ namespace Amaken.Controllers
             }
 
             return "OK";
-        } 
-        static string CheckEmail (string email) { 
+        }*/
+        static string CheckEmail(string email)
+        {
 
             bool isValidEmail = Regex.IsMatch(email, @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$");
             
@@ -178,7 +200,7 @@ namespace Amaken.Controllers
             }
             else
             {
-               return "Please check the email format";
+                return "Please check the email format";
             }
         }
     }

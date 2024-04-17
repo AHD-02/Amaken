@@ -25,6 +25,7 @@ namespace Amaken.Controllers
                     if (Event != null)
                     {
                         myReservation.DateOfReservation = DateTime.SpecifyKind(myReservation.DateOfReservation, DateTimeKind.Utc);
+                        myReservation.Status = "OK";
                         _context.Reservation.Add(myReservation);
                         _context.SaveChanges();
                         return Ok("Reservation is created.");
@@ -45,19 +46,27 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid user data");
             }
         }
-        [HttpDelete]
-        [Route("api/[controller]/DeleteReservation")]
-        public IActionResult DeleteReservation(string myReservationId)
+        [HttpPut]
+        [Route("api/[controller]/TriggerReservationStatus")]
+        public IActionResult TriggerReservationStatus(string myReservationId, string newStatus)
         {
             if (ModelState.IsValid)
             {
-                var Reservation = _context.Reservation.FirstOrDefault(u=>u.ReservationId!.ToLower().Equals(myReservationId.ToLower()));
-                if(Reservation != null)
+                var Reservation = _context.Reservation.FirstOrDefault(u => u.ReservationId!.ToLower().Equals(myReservationId.ToLower()));
+                if (Reservation != null)
                 {
-                Reservation.DateOfReservation = DateTime.SpecifyKind(Reservation.DateOfReservation, DateTimeKind.Utc);
-                    _context.Reservation.Remove(Reservation);
-                    _context.SaveChanges();
-                    return Ok("Reservation was deleted successfully");
+                    if (Enum.IsDefined(typeof(ReservationStatus), newStatus))
+                    {
+                        Reservation.DateOfReservation = DateTime.SpecifyKind(Reservation.DateOfReservation, DateTimeKind.Utc);
+                        Reservation.Status = newStatus;
+                        _context.SaveChanges();
+                        return Ok("Reservation status triggered to " + newStatus);
+                    }
+                    else
+                    {
+                        return BadRequest("Status is undefined");
+                    }
+
                 }
                 else
                 {
@@ -82,6 +91,7 @@ namespace Amaken.Controllers
                     Reservation.UserEmail = myReservation.UserEmail;
                     Reservation.DateOfReservation = myReservation.DateOfReservation;
                     Reservation.EventId = myReservation.EventId;
+                    Reservation.Status = myReservation.Status;
                     _context.SaveChanges();
                     return Ok("Reservation was updated successfully");
                 }

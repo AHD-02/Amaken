@@ -6,7 +6,7 @@ namespace Amaken.Controllers
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public EventController (ApplicationDbContext context)
+        public EventController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -19,13 +19,17 @@ namespace Amaken.Controllers
                 var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == newEvent.UserEmail!.ToLower());
                 newEvent.EventStart = DateTime.SpecifyKind(newEvent.EventStart, DateTimeKind.Utc);
                 newEvent.EventEnd = DateTime.SpecifyKind(newEvent.EventEnd, DateTimeKind.Utc);
-                if (user != null) {_context.Event.Add(newEvent);
+                if (user != null)
+                {
+                    newEvent.Status = "OK";
+                    _context.Event.Add(newEvent);
                     _context.SaveChanges();
-                return Ok("Event is created"); }
+                    return Ok("Event is created");
+                }
                 else { return NotFound("User wasn't found"); }
-                
-                
-            } 
+
+
+            }
             else return BadRequest("Data is invalid");
         }
         [HttpPut]
@@ -47,6 +51,7 @@ namespace Amaken.Controllers
                     existingEvent.EventEnd = updatedEvent.EventEnd;
                     existingEvent.Fees = updatedEvent.Fees;
                     existingEvent.UserEmail = updatedEvent.UserEmail;
+                    existingEvent.Status = updatedEvent.Status;
                     _context.SaveChanges();
                     return Ok(existingEvent.EventId + " is updated");
 
@@ -60,27 +65,34 @@ namespace Amaken.Controllers
             }
             else return BadRequest("Data is invalid");
         }
-        [HttpDelete]
-        [Route("api/[controller]/DeleteEvent")]
-        public IActionResult DeleteEvent(string EventId)
+        [HttpPut]
+        [Route("api/[controller]/TriggerEventStatus")]
+        public IActionResult TriggerEventStatus(string EventId, string newStatus)
         {
             if (ModelState.IsValid)
             {
                 var Event = _context.Event.FirstOrDefault(u => u.EventId!.ToLower().Equals(EventId.ToLower()));
                 if (Event != null)
                 {
-                    Event.EventStart = DateTime.SpecifyKind(Event.EventStart, DateTimeKind.Utc);
-                    Event.EventEnd = DateTime.SpecifyKind(Event.EventEnd, DateTimeKind.Utc);
-                    _context.Event.Remove(Event);
-                    _context.SaveChanges();
-                    return Ok("Event was deleted successfully");
+                    if (Enum.IsDefined(typeof(EventStatus), newStatus))
+                    {
+                        Event.EventStart = DateTime.SpecifyKind(Event.EventStart, DateTimeKind.Utc);
+                        Event.EventEnd = DateTime.SpecifyKind(Event.EventEnd, DateTimeKind.Utc);
+                        Event.Status = newStatus;
+                        _context.SaveChanges();
+                        return Ok("Event status triggered to " + newStatus);
+                    }
+                    else
+                    {
+                        return BadRequest("Status is undefined");
+                    }
                 }
                 else
                 {
                     return NotFound("Event wasn't found");
-                    
+
                 }
-                    
+
             }
             else return BadRequest("Data is invalid");
         }

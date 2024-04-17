@@ -4,7 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amaken.Models
 {
-
+    public enum Public_Place_Status
+    {
+        OK,
+        Deleted,
+        Suspended
+    }
     public class Public_Place
     {
         [Key]
@@ -17,7 +22,10 @@ namespace Amaken.Models
         [Required]
         public string? Name { get; set; }
         [Required]
-        public string? UserEmail { get; set; } 
+        public string? UserEmail { get; set; }
+        [Required]
+        public string? Status { get; set; }
+        public DateTime AddedOn { get; set; }
 
 
     }

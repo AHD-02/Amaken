@@ -4,7 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amaken.Models
 {
-
+    public enum Private_Place_Status
+    {
+        OK,
+        Deleted,
+        Suspended,
+        Unapproved
+    }
     public class Private_Place
     {
         [Key]
@@ -16,8 +22,9 @@ namespace Amaken.Models
         public string? Description { get; set; }
         [Required]
         public string? UserEmail { get; set; } 
-        [ForeignKey("UserEmail")]
-        public User? User { get; set; }
+        [Required]
+        public String Status { get; set; } = "Unapproved";
+        public DateTime AddedOn { get; set; }
 
 
     }
