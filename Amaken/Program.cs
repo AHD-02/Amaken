@@ -4,6 +4,14 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder => builder
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
+
 // Add services to the container.
 var ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(ConnectionString));
@@ -13,6 +21,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
+builder.Services.Configure<DigitalOceanSpacesSettings>(builder.Configuration.GetSection("DigitalOceanSpaces"));
+builder.Services.AddTransient<DigitalOceanStorageService>();
 builder.Services.AddSwaggerGen(options =>
 {
     
@@ -44,9 +54,8 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
 var app = builder.Build();
-
+app.UseCors("CorsPolicy");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -54,9 +63,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(b => b.AllowAnyOrigin()
-    .AllowAnyHeader()
-    .AllowAnyMethod());
 
 app.UseHttpsRedirection();
 

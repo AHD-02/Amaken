@@ -85,11 +85,11 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/ApprovePrivatePlace")]
-        public IActionResult ApprovePrivatePlace (string PlaceId)
+        public IActionResult ApprovePrivatePlace (string newPlaceId)
         {
             if (ModelState.IsValid)
             {
-                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(PlaceId));
+                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(newPlaceId));
                 if (PrivatePlace != null)
                 {
                     PrivatePlace.Status = "OK";

@@ -65,7 +65,7 @@ namespace Amaken.Controllers
                     User.Country = newUser.Country;
                     User.City = newUser.City;
                     User.DateOfBirth = newUser.DateOfBirth;
-                    User.Image = newUser.Image;
+                    User.Images = newUser.Images;
                     User.Status = newUser.Status;
                     _context.SaveChanges();
                     return Ok("User has been updated");

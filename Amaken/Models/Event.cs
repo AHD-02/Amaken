@@ -31,8 +31,8 @@ namespace Amaken.Models
         public string? UserEmail { get; set; }
         [Required]
         public string Status { get; set; } = "OK";
-
-
+        
+        public string[] Images { get; set; } 
 
     }
 }

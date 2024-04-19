@@ -20,6 +20,5 @@ namespace Amaken.Models
         public DbSet<Private_Place> Private_Place { get; set; }
         public DbSet<Public_Place> Public_Place { get; set; }
         public DbSet<Reservation> Reservation { get; set; }
-        public DbSet<ImageUri> ImageUri { get; set; }
     }
 }

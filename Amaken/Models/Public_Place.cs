@@ -16,7 +16,8 @@ namespace Amaken.Models
         public string? PublicPlaceId { get; set; }
         [Required]
         public string? Description { get; set; }
-        public List<ImageUri> Images { get; set; } = new List<ImageUri>();
+        
+        public string[] Images { get; set; } 
         [Required]
         public string? Location { get; set; }
         [Required]

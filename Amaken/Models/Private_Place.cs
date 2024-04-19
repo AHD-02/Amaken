@@ -18,7 +18,8 @@ namespace Amaken.Models
         public string? RegisterNumber { get; set; }
         public string? PlaceName { get; set; }
         public string? Location { get; set; }
-        public List<ImageUri> Images { get; set; } = new List<ImageUri>();
+
+        public string[] Images { get; set; } 
         public string? Description { get; set; }
         [Required]
         public string? UserEmail { get; set; } 

@@ -8,7 +8,7 @@ namespace Amaken.Controllers
         private readonly ApplicationDbContext _context;
         public EventController(ApplicationDbContext context)
         {
-            _context = context;
+            _context = context; 
         }
         [HttpPost]
         [Route("api/[controller]/CreateEvent")]
@@ -52,6 +52,7 @@ namespace Amaken.Controllers
                     existingEvent.Fees = updatedEvent.Fees;
                     existingEvent.UserEmail = updatedEvent.UserEmail;
                     existingEvent.Status = updatedEvent.Status;
+                    existingEvent.Images = updatedEvent.Images;
                     _context.SaveChanges();
                     return Ok(existingEvent.EventId + " is updated");
 
