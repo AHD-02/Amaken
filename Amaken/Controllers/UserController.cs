@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Amaken.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.RegularExpressions;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,12 +12,10 @@ namespace Amaken.Controllers
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context; 
-        private readonly IConfiguration _configuration;
 
-        public UserController(ApplicationDbContext context, IConfiguration configuration) 
+        public UserController(ApplicationDbContext context) 
         {
             _context = context;
-            _configuration = configuration;
         }
         
         [HttpPost]
@@ -97,7 +94,7 @@ namespace Amaken.Controllers
                 }
                 else
                 {
-                    return BadRequest("User account isn't accessable");
+                    return BadRequest("User account isn't accessible");
                 }
             }
             else
@@ -129,7 +126,7 @@ namespace Amaken.Controllers
             }
         }
 
-        static private string GenerateJwtToken(string userEmail)
+        static public string GenerateJwtToken(string userEmail)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 

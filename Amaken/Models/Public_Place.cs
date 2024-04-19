@@ -16,7 +16,7 @@ namespace Amaken.Models
         public string? PublicPlaceId { get; set; }
         [Required]
         public string? Description { get; set; }
-        
+        [Required]
         public string[] Images { get; set; } 
         [Required]
         public string? Location { get; set; }

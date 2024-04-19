@@ -1,6 +1,5 @@
 ﻿using Amaken.Models;
 using Microsoft.AspNetCore.Mvc;
-
 namespace Amaken.Controllers
 {
     public class AdminController : Controller
@@ -10,7 +9,30 @@ namespace Amaken.Controllers
         {
             _context = context;
         }
+        [HttpPost]
+        [Route("api/[controller]/SignIn")]
+        public IActionResult SignIn(string email, string password)
+        {
+            var Admin = _context.Admin.FirstOrDefault(u => u.Email!.ToLower() == email.ToLower() && u.Password == password);
 
+            if (Admin != null)
+            {
+                if (Admin.Status=="OK")
+                {
+                    var token = UserController.GenerateJwtToken(Admin.Email!);
+
+                    return Ok(new { Token = token });
+                }
+                else
+                {
+                    return BadRequest("Admin account isn't accessible");
+                }
+            }
+            else
+            {
+                return Unauthorized("Invalid email or password");
+            }
+        }
         [HttpPost]
         [Route("api/[controller]/CreateAdmin")]
         public IActionResult CreateAdmin (Admin admin)

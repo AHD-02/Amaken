@@ -25,7 +25,7 @@ namespace Amaken.Models
         public DateTime DateOfBirth { get; set; }
         [Required]
         public string? Phone { get; set; }
-        public string[] Images { get; set; } 
+        public string[]? Images { get; set; } 
         [Required]
         public string? Country { get; set; }
         [Required]
