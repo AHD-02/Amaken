@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
+using Amaken.Types;
 
 namespace Amaken.Controllers
 {
@@ -80,7 +81,7 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/SignIn")]
-        public IActionResult SignIn([FromBody] SignInRequest request)
+        public IActionResult SignIn([FromBody] CommonTypes.SignInRequest request)
         {
             var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password == request.Password);
 
@@ -103,11 +104,6 @@ namespace Amaken.Controllers
             }
         }
 
-        public class SignInRequest
-        {
-            public string Email { get; set; }
-            public string Password { get; set; }
-        }
         [HttpPut]
         [Route("api/[controller]/TriggerUserStatus")]
         public IActionResult TriggerUserStatus (string email, string newStatus)

@@ -1,4 +1,5 @@
 ﻿using Amaken.Models;
+using Amaken.Types;
 using Microsoft.AspNetCore.Mvc;
 namespace Amaken.Controllers
 {
@@ -11,9 +12,9 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/SignIn")]
-        public IActionResult SignIn(string email, string password)
+        public IActionResult SignIn([FromBody] CommonTypes.SignInRequest request)
         {
-            var Admin = _context.Admin.FirstOrDefault(u => u.Email!.ToLower() == email.ToLower() && u.Password == password);
+            var Admin = _context.Admin.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password == request.Password);
 
             if (Admin != null)
             {
