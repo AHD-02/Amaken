@@ -80,13 +80,13 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/SignIn")]
-        public IActionResult SignIn(string email, string password)
+        public IActionResult SignIn([FromBody] SignInRequest request)
         {
-            var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == email.ToLower() && u.Password == password);
+            var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password == request.Password);
 
             if (user != null)
             {
-                if (user.Status=="OK")
+                if (user.Status == "OK")
                 {
                     var token = GenerateJwtToken(user.Email!);
 
@@ -101,6 +101,12 @@ namespace Amaken.Controllers
             {
                 return Unauthorized("Invalid email or password");
             }
+        }
+
+        public class SignInRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
         }
         [HttpPut]
         [Route("api/[controller]/TriggerUserStatus")]
