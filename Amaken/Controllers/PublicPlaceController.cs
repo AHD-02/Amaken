@@ -1,4 +1,6 @@
-﻿using Amaken.Models;
+﻿using System.Security.Claims;
+using Amaken.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amaken.Controllers
@@ -12,15 +14,26 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/CreatePublicPlace")]
+        [Authorize]
         public IActionResult CreatePublicPlace(Public_Place myPublic_Place)
         {
             if (ModelState.IsValid)
             {
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                if (MyUser != null)
+                {
+                    
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(myPublic_Place.AddedOn, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
                 return Ok("Public place was added successfully");
+                }
+                else
+                {
+                    return Unauthorized("User isn't authorized");
+                }
             }
             else
             {

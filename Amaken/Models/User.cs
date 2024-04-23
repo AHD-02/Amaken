@@ -26,6 +26,7 @@ namespace Amaken.Models
         [Required]
         public string? Phone { get; set; }
         public string[]? Images { get; set; } 
+        public string[]? SavedEvents { get; set; } 
         [Required]
         public string? Country { get; set; }
         [Required]
@@ -33,6 +34,8 @@ namespace Amaken.Models
 
         [Required]
         public string? Status { get; set; } = "OK";
+        
+        
 
 
     }

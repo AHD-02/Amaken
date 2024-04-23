@@ -1,6 +1,7 @@
 ﻿using Amaken.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Security.Claims;
 namespace Amaken.Controllers
 {
     public class ReservationController : Controller
@@ -13,18 +14,22 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/CreateReservation")]
+        [Authorize]
         public IActionResult CreateReservation(Reservation myReservation)
         {
             if (ModelState.IsValid)
             {
-                var User = _context.User.FirstOrDefault(u => u.Email!.ToLower() == myReservation.UserEmail!.ToLower());
-                var Event = _context.Event.FirstOrDefault(u => u.EventId!.ToLower() == myReservation.EventId!.ToLower());
-
-                if (User != null)
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                if (MyUser != null)
                 {
+                    var Event = _context.Event.FirstOrDefault(u =>
+                        u.EventId!.ToLower().Equals(myReservation.EventId!.ToLower()));
                     if (Event != null)
                     {
-                        myReservation.DateOfReservation = DateTime.SpecifyKind(myReservation.DateOfReservation, DateTimeKind.Utc);
+                        myReservation.DateOfReservation =
+                            DateTime.SpecifyKind(myReservation.DateOfReservation, DateTimeKind.Utc);
+                        myReservation.UserEmail = MyUser.Email;
                         myReservation.Status = "OK";
                         _context.Reservation.Add(myReservation);
                         _context.SaveChanges();
@@ -34,12 +39,15 @@ namespace Amaken.Controllers
                     {
                         return NotFound("Event wasn't found");
                     }
-
                 }
                 else
                 {
-                    return NotFound("User wasn't found");
+                    return Unauthorized("User isn't authorized");
                 }
+
+
+
+
             }
             else
             {

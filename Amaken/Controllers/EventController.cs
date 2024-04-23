@@ -1,4 +1,6 @@
-﻿using Amaken.Models;
+﻿using System.Security.Claims;
+using Amaken.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amaken.Controllers
@@ -12,21 +14,35 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/CreateEvent")]
+        [Authorize]
         public IActionResult CreateEvent(Event newEvent)
         {
             if (ModelState.IsValid)
             {
-                var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == newEvent.UserEmail!.ToLower());
-                newEvent.EventStart = DateTime.SpecifyKind(newEvent.EventStart, DateTimeKind.Utc);
-                newEvent.EventEnd = DateTime.SpecifyKind(newEvent.EventEnd, DateTimeKind.Utc);
-                if (user != null)
+                
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                if (MyUser!= null)
                 {
-                    newEvent.Status = "OK";
-                    _context.Event.Add(newEvent);
-                    _context.SaveChanges();
-                    return Ok("Event is created");
+                    var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == newEvent.UserEmail!.ToLower());
+                    newEvent.EventStart = DateTime.SpecifyKind(newEvent.EventStart, DateTimeKind.Utc);
+                    newEvent.EventEnd = DateTime.SpecifyKind(newEvent.EventEnd, DateTimeKind.Utc);
+                    if (user != null)
+                    {
+                        newEvent.Status = "OK";
+                        _context.Event.Add(newEvent);
+                        _context.SaveChanges();
+                        return Ok("Event is created");
+                    }
+                    else
+                    {
+                        return NotFound("User wasn't found");
+                    }
                 }
-                else { return NotFound("User wasn't found"); }
+                else
+                {
+                    return Unauthorized("User isn't authorized");
+                }
 
 
             }

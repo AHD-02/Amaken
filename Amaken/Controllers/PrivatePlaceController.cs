@@ -1,4 +1,6 @@
-﻿using Amaken.Models;
+﻿using System.Security.Claims;
+using Amaken.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amaken.Controllers
@@ -12,15 +14,26 @@ namespace Amaken.Controllers
         }
         [HttpPost]
         [Route("api/[controller]/CreatePriavtePlace")]
+        [Authorize]
         public IActionResult CreatePriavtePlace(Private_Place myPrivate_Place)
         {
             if (ModelState.IsValid)
             {
+                var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                if (MyUser != null)
+                {
+                    
                 myPrivate_Place.AddedOn = DateTime.SpecifyKind(myPrivate_Place.AddedOn, DateTimeKind.Utc);
                 myPrivate_Place.Status = "Unapproved";
                 _context.Private_Place.Add(myPrivate_Place);
                 _context.SaveChanges();
                 return Ok("Private place was added successfully, needs admin's approval");
+                }
+                else
+                {
+                    return Unauthorized("User isn't authorized");
+                }
             }
             else
             {
