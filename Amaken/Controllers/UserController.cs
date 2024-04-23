@@ -7,16 +7,19 @@ using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
 using Amaken.Types;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Amaken.Controllers
 {
     public class UserController : Controller
     {
-        private readonly ApplicationDbContext _context; 
-
-        public UserController(ApplicationDbContext context) 
+        private readonly ApplicationDbContext _context;  
+        private readonly IConfiguration _configuration; 
+        
+        public UserController(ApplicationDbContext context, IConfiguration configuration) 
         {
             _context = context;
+            _configuration = configuration;
         }
         
         [HttpPost]
@@ -31,7 +34,8 @@ namespace Amaken.Controllers
                     newUser.Status = "OK";
                     _context.User.Add(newUser);
                     _context.SaveChanges();
-                    var token = GenerateJwtToken(newUser.Email!);
+                    var jwtSecret = _configuration["Jwt:Secret"];
+                    var token = GenerateJwtToken(newUser.Email!, jwtSecret);
                     return Ok(new { Token = token });
                 }
                 else
@@ -89,7 +93,8 @@ namespace Amaken.Controllers
             {
                 if (user.Status == "OK")
                 {
-                    var token = GenerateJwtToken(user.Email!);
+                    var jwtSecret = _configuration["Jwt:Secret"];
+                    var token = GenerateJwtToken(user.Email!, jwtSecret);
 
                     return Ok(new { Token = token });
                 }
@@ -104,6 +109,80 @@ namespace Amaken.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("api/[controller]/SaveEvent")]
+        [Authorize]
+        public IActionResult SaveEvent(string eventId)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
+                if (myEvent != null)
+                {
+                   
+                List<string> list = new List<string>(MyUser.SavedEvents ?? new string[0]);
+                if (!list.Contains(eventId))
+                {
+                list.Add(eventId);
+                MyUser.SavedEvents = list.ToArray();
+                _context.SaveChanges();
+                return Ok($"Event {eventId} is saved");
+                }
+
+                else
+                {
+                    return BadRequest("Event is already saved");
+                } 
+                }
+                else
+                {
+                    return NotFound("Event wasn't found");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
+        [HttpPost]
+        [Route("api/[controller]/UnSaveEvent")]
+        [Authorize]
+        public IActionResult UnSaveEvent(string eventId)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
+                if (myEvent != null)
+                {
+                    List<string> list = new List<string>(MyUser.SavedEvents ?? new string[0]);
+                    if (list.Contains(eventId))
+                    {
+                        list.Remove(eventId);
+                        MyUser.SavedEvents = list.ToArray();
+                        _context.SaveChanges();
+                        return Ok($"Event {eventId} is removed");
+                    }
+
+                    else
+                    {
+                        return BadRequest("Event isn't saved");
+                    } 
+                }
+                else
+                {
+                    return NotFound("Event wasn't found");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
+        
         [HttpPut]
         [Route("api/[controller]/TriggerUserStatus")]
         public IActionResult TriggerUserStatus (string email, string newStatus)
@@ -128,23 +207,16 @@ namespace Amaken.Controllers
             }
         }
 
-        static public string GenerateJwtToken(string userEmail)
+        static public string GenerateJwtToken(string userEmail, string secretKey)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-
-            var randomBytes = new byte[32];
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(randomBytes);
-            }
-            var base64Secret = Convert.ToBase64String(randomBytes);
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(base64Secret));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-            new Claim(ClaimTypes.Email, userEmail),
+                    new Claim(ClaimTypes.Email, userEmail),
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
@@ -154,6 +226,7 @@ namespace Amaken.Controllers
             return tokenHandler.WriteToken(token);
         }
 
+        
         [HttpGet]
         [Route("api/[controller]/SearchUsers")]
         public IActionResult SearchUsers()

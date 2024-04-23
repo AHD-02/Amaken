@@ -6,9 +6,11 @@ namespace Amaken.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public AdminController(ApplicationDbContext context)
+        private readonly IConfiguration _configuration; 
+        public AdminController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         [HttpPost]
         [Route("api/[controller]/SignIn")]
@@ -20,7 +22,8 @@ namespace Amaken.Controllers
             {
                 if (Admin.Status=="OK")
                 {
-                    var token = UserController.GenerateJwtToken(Admin.Email!);
+                    var jwtSecret = _configuration["Jwt:Secret"];
+                    var token = UserController.GenerateJwtToken(request.Email!, jwtSecret);
 
                     return Ok(new { Token = token });
                 }
