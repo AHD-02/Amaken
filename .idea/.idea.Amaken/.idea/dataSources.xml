@@ -9,5 +9,13 @@
       <jdbc-url>jdbc:postgresql://db-postgresql-fra1-83565-do-user-16067379-0.c.db.ondigitalocean.com:25060/defaultdb?password=AVNS__SsPpnZREcQbf_65XL0&amp;user=doadmin</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="defaultdb@db-postgresql-fra1-83565-do-user-16067379-0.c.db.ondigitalocean.com [2]" uuid="7d96abfa-c30e-470c-876c-af2493389e11">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://db-postgresql-fra1-83565-do-user-16067379-0.c.db.ondigitalocean.com:25060/defaultdb?password=AVNS__SsPpnZREcQbf_65XL0&amp;user=doadmin</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Amaken.Types;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Models
 {
@@ -20,5 +21,6 @@ namespace Amaken.Models
         public DbSet<Private_Place> Private_Place { get; set; }
         public DbSet<Public_Place> Public_Place { get; set; }
         public DbSet<Reservation> Reservation { get; set; }
+        public DbSet<CommonTypes.City> City { get; set; }
     }
 }
