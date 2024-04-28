@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Security.Cryptography;
 using Amaken.Types;
 using Microsoft.AspNetCore.Authorization;
 
@@ -114,21 +113,7 @@ namespace Amaken.Controllers
             public string label { get; set; }
         }
         
-        [HttpPost]
-        [Route("api/[controller]/FillCountries")]
-        public IActionResult FillCountries([FromBody] List<CityObject> countriesObjects )
-        {
         
-            for (int i = 0; i <countriesObjects.Count; i++)
-            {
-                CommonTypes.City c = new CommonTypes.City(countriesObjects[i].label,countriesObjects[i].value);
-                c.ID = $"{i+1}";
-                _context.City.Add(c);
-                _context.SaveChanges();
-            }
-
-            return Ok();
-        }
         [HttpPost]
         [Route("api/[controller]/SaveEvent")]
         [Authorize]

@@ -16,21 +16,11 @@ public class CommonTypes
         public int Offset { get; set; }
         public IEnumerable<T> Matches { get; set; }
     }
+    
 
-    public class City
+    public class LookupModel
     {
-        [Key]
-        [Required]
-        public string ID { get; set; }
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public string Country_Code { get; set; }
-
-        public City(string name, string MyCountryCode)
-        {
-            this.Name = name;
-            this.Country_Code = MyCountryCode;
-        }
+        public string Label { get; set; }
+        public string Value { get; set; }
     }
 }
