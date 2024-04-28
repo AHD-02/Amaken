@@ -22,7 +22,7 @@ namespace Amaken.Controllers
         }
         
         [HttpPost]
-        [Route("api/[controller]/CreateUser")]
+        [Route("api/[controller]/Create")]
         public IActionResult CreateUser(User newUser)
         {
             if (ModelState.IsValid)
@@ -50,7 +50,7 @@ namespace Amaken.Controllers
 
         }
         [HttpPut]
-        [Route("api/[controller]/UpdateUser")]
+        [Route("api/[controller]/Update")]
         public IActionResult UpdateUser(User newUser)
         {
             if (ModelState.IsValid)
@@ -233,13 +233,15 @@ namespace Amaken.Controllers
 
         
         [HttpGet]
-        [Route("api/[controller]/SearchUsers")]
+        [Route("api/[controller]/Search")]
         public IActionResult SearchUsers()
         {
             var Users = _context.User.ToList();
 
             return Ok(Users);
         }
+        
+        
         /*static string CheckPassword(string password)
         {
             if (String.IsNullOrEmpty(password))
