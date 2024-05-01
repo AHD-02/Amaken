@@ -233,12 +233,21 @@ namespace Amaken.Controllers
 
         
         [HttpGet]
-        [Route("api/[controller]/Search")]
-        public IActionResult SearchUsers()
+        [Route("api/[controller]/Me")]
+        [Authorize]
+        public IActionResult Me()
         {
-            var Users = _context.User.ToList();
-
-            return Ok(Users);
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                return Ok(MyUser);
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+           
         }
         
         
