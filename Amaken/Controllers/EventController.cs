@@ -144,6 +144,20 @@ namespace Amaken.Controllers
 
             return Ok(events);
         }
+        
+        [HttpGet]
+        [Route("api/[controller]/{id}")]
+        public async Task<IActionResult>GetEvent(string id)
+        {
+            var events = await _context.Event
+                .AsNoTracking()
+                .Where(e => e.EventId == id)
+                .FirstOrDefaultAsync();
+            if (events == null)
+                throw new Exception($"Event with id {id} was not found");
+            
+            return Ok(events);
+        }
 
     }
 }
