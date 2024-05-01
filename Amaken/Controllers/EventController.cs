@@ -2,6 +2,7 @@
 using Amaken.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Controllers
 {
@@ -120,6 +121,28 @@ namespace Amaken.Controllers
             var Events = _context.Event.ToList();
 
             return Ok(Events);
+        }
+        
+        [HttpGet]
+        [Route("api/[controller]/SearchSavedEvents")]
+        [Authorize]
+        public async Task<IActionResult> SearchSavedEvents()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            if (user == null)
+                throw new UnauthorizedAccessException("User was not found");
+
+            if (user.SavedEvents == null)
+                return Ok(new List<Event>());
+            
+            var events = await _context.Event
+                .AsNoTracking()
+                .Where(e => user.SavedEvents.Contains(e.EventId))
+                .ToListAsync();
+
+            return Ok(events);
         }
 
     }
