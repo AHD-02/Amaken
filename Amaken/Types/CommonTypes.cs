@@ -1,7 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Amaken.Types;
-
+using System.Security.Cryptography;
+using System.Text;
 public class CommonTypes
 {
     public class SignInRequest
@@ -16,11 +15,12 @@ public class CommonTypes
         public int Offset { get; set; }
         public IEnumerable<T> Matches { get; set; }
     }
-    
+
 
     public class LookupModel
     {
         public string Label { get; set; }
         public string Value { get; set; }
     }
+
 }

@@ -1,6 +1,8 @@
 ﻿using Amaken.Models;
 using Amaken.Types;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
+using System.Text;
 namespace Amaken.Controllers
 {
     public class AdminController : Controller
@@ -16,7 +18,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/SignIn")]
         public IActionResult SignIn([FromBody] CommonTypes.SignInRequest request)
         {
-            var Admin = _context.Admin.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password == request.Password);
+            var Admin = _context.Admin.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password.Equals(HashPassword(request.Password)));
 
             if (Admin != null)
             {
@@ -44,6 +46,7 @@ namespace Amaken.Controllers
             if (ModelState.IsValid)
             {
                 admin.Status = "OK";
+                admin.Password = HashPassword(admin.Password);
                 _context.Admin.Add(admin);
                 _context.SaveChanges();
                 return Ok("Admin was created successfully");
@@ -63,7 +66,7 @@ namespace Amaken.Controllers
                 var myAdmin = _context.Admin.FirstOrDefault(u=>u.Email!.Equals(admin.Email));
                 if (myAdmin != null)
                 {
-                    myAdmin.Password = admin.Password;
+                    myAdmin.Password = HashPassword(admin.Password!);
                     myAdmin.Name = admin.Name;
                     myAdmin.Status = admin.Status;
                     _context.SaveChanges();
@@ -139,6 +142,22 @@ namespace Amaken.Controllers
             var Admins = _context.Admin.ToList();
 
             return Ok(Admins);
+        }
+        public static string HashPassword (string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        
+                StringBuilder builder = new StringBuilder();
+        
+                for (int i = 0; i < data.Length; i++)
+                {
+                    builder.Append(data[i].ToString("x2"));
+                }
+        
+                return builder.ToString();
+            }
         }
     }
 }

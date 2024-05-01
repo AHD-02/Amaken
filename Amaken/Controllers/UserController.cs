@@ -7,6 +7,8 @@ using System.Security.Claims;
 using System.Text;
 using Amaken.Types;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Amaken.Controllers
 {
@@ -31,6 +33,7 @@ namespace Amaken.Controllers
                 {
                     newUser.DateOfBirth = DateTime.SpecifyKind(newUser.DateOfBirth, DateTimeKind.Utc);
                     newUser.Status = "OK";
+                    newUser.Password = HashPassword(newUser.Password!);
                     _context.User.Add(newUser);
                     _context.SaveChanges();
                     var jwtSecret = _configuration["Jwt:Secret"];
@@ -61,7 +64,7 @@ namespace Amaken.Controllers
                 {
                     User.FirstName = newUser.FirstName;
                     User.LastName = newUser.LastName;
-                    User.Password = newUser.Password;
+                    User.Password = HashPassword(newUser.Password!);
                     User.Phone = newUser.Phone;
                     User.Country = newUser.Country;
                     User.City = newUser.City;
@@ -86,7 +89,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/SignIn")]
         public IActionResult SignIn([FromBody] CommonTypes.SignInRequest request)
         {
-            var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == request.Email.ToLower() && u.Password == request.Password);
+            var user = _context.User.FirstOrDefault(u => u.Email!.ToLower().Equals(request.Email.ToLower()) && u.Password!.Equals(HashPassword(request.Password)));
 
             if (user != null)
             {
@@ -249,7 +252,22 @@ namespace Amaken.Controllers
             }
            
         }
+        public static string HashPassword (string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
         
+                StringBuilder builder = new StringBuilder();
+        
+                for (int i = 0; i < data.Length; i++)
+                {
+                    builder.Append(data[i].ToString("x2"));
+                }
+        
+                return builder.ToString();
+            }
+        }
         
         /*static string CheckPassword(string password)
         {
@@ -277,6 +295,7 @@ namespace Amaken.Controllers
 
             return "OK";
         }*/
+
         static string CheckEmail(string email)
         {
 
