@@ -226,7 +226,7 @@ namespace Amaken.Controllers
                 {
                     new Claim(ClaimTypes.Email, userEmail),
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddYears(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
             };
 
