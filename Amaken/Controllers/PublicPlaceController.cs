@@ -2,6 +2,7 @@
 using Amaken.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Controllers
 {
@@ -106,6 +107,21 @@ namespace Amaken.Controllers
             var PublicPlaces = _context.Public_Place.ToList();
 
             return Ok(PublicPlaces);
+        }
+        
+        
+        [HttpGet]
+        [Route("api/[controller]/{id}")]
+        public async Task<IActionResult>GetPlace(string id)
+        {
+            var place = await _context.Public_Place
+                .AsNoTracking()
+                .Where(e => e.PublicPlaceId == id)
+                .FirstOrDefaultAsync();
+            if (place == null)
+                throw new Exception($"Event with id {id} was not found");
+            
+            return Ok(place);
         }
     }
 }
