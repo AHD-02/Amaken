@@ -14,6 +14,7 @@ namespace Amaken.Controllers
             _context = context;
         }
         
+        
         [HttpPost]
         [Route("api/[controller]/CreatePublicPlace")]
         [Authorize]
