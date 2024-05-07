@@ -40,8 +40,8 @@ namespace Amaken.Controllers
             }
         }
         [HttpPost]
-        [Route("api/[controller]/CreateAdmin")]
-        public IActionResult CreateAdmin (Admin admin)
+        [Route("api/[controller]/Create")]
+        public IActionResult CreateAdmin ([FromBody] Admin admin)
         {
             if (ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/UpdateAdmin")]
-        public IActionResult UpdateAdmin (Admin admin)
+        public IActionResult UpdateAdmin ([FromBody] Admin admin)
         {
             if (ModelState.IsValid)
             {
@@ -135,6 +135,7 @@ namespace Amaken.Controllers
                 return BadRequest("Data is invalid");
             }
         }
+        
         [HttpGet]
         [Route("api/[controller]/SearchAdmins")]
         public IActionResult SearchAdmins()
@@ -142,6 +143,20 @@ namespace Amaken.Controllers
             var Admins = _context.Admin.ToList();
 
             return Ok(Admins);
+        }
+        
+        [HttpGet]
+        [Route("api/[controller]/{email}")]
+        public IActionResult GetAdmin(string email)
+        {
+            var admin = _context.Admin.Where(a => a.Email == email).ToList();
+            
+            if (admin == null)
+            {
+                return BadRequest("Admin Not Found");
+            }
+            
+            return Ok(admin);
         }
         public static string HashPassword (string password)
         {
