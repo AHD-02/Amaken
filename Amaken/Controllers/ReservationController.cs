@@ -15,7 +15,7 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/CreateReservation")]
         [Authorize]
-        public IActionResult CreateReservation(Reservation myReservation)
+        public IActionResult CreateReservation([FromBody] Reservation myReservation)
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +88,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/UpdateReservation")]
-        public IActionResult UpdateReservation(Reservation myReservation)
+        public IActionResult UpdateReservation([FromBody] Reservation myReservation)
         {
             if (ModelState.IsValid)
             {

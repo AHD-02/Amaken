@@ -27,30 +27,38 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/UploadImage")]
         [Authorize]
-        public async Task<IActionResult> UploadImage(IFormFile file)
+        public async Task<IActionResult> UploadImage(IFormFile[] files)
         {
             
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            List <string> ListOfImages = new List<string>();
             if (MyUser != null)
             {
-                            _logger.LogInformation("UploadImage method called.");
+                for (int i = 0; i < files.Length; i++)
+                {
+                    _logger.LogInformation("UploadImage method called.");
                 
-                            if (file == null || file.Length == 0)
-                            {
-                                _logger.LogWarning("No file uploaded.");
-                                return BadRequest("No file uploaded");
-                            }
+                    if (files[i] == null || files[i].Length == 0)
+                    {
+                        _logger.LogWarning("No file uploaded.");
+                        return BadRequest("No file uploaded");
+                    }
                 
-                            _logger.LogInformation($"Received file: {file.FileName}");
+                    _logger.LogInformation($"Received file: {files[i].FileName}");
                 
-                            var fileName = await _storageService.UploadImageAsync(file);
+                    var fileName = await _storageService.UploadImageAsync(files[i]);
                 
-                            _logger.LogInformation($"Uploaded file: {fileName}");
+                    _logger.LogInformation($"Uploaded file: {fileName}");
                 
-                            var imageUrl = $"{_endpointUrl}/{fileName}";
+                    var imageUrl = $"{_endpointUrl}/{fileName}";
                 
-                            return Ok(new { imageUrl });
+                    ListOfImages.Add(imageUrl);
+                }
+
+                string[] ArrayOfImagesUrls = ListOfImages.ToArray();
+                return Ok(ArrayOfImagesUrls);
+
             }
             else
             {

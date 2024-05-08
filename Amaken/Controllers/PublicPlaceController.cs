@@ -18,7 +18,7 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/CreatePublicPlace")]
         [Authorize]
-        public IActionResult CreatePublicPlace(Public_Place myPublic_Place)
+        public IActionResult CreatePublicPlace([FromBody] Public_Place myPublic_Place)
         {
             if (ModelState.IsValid)
             {
@@ -75,7 +75,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/UpdatePublicPlace")]
-        public IActionResult UpdatePublicPlace(Public_Place updatedPlace)
+        public IActionResult UpdatePublicPlace([FromBody] Public_Place updatedPlace)
         {
             if (ModelState.IsValid)
             {
@@ -84,6 +84,8 @@ namespace Amaken.Controllers
                 {
                     updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
                     PublicPlace.UserEmail = updatedPlace.UserEmail;
+                    PublicPlace.Longitude = updatedPlace.Longitude;
+                    PublicPlace.Latitude = updatedPlace.Latitude;
                     PublicPlace.Location = updatedPlace.Location;
                     PublicPlace.Description = updatedPlace.Description;
                     PublicPlace.Status = updatedPlace.Status;
@@ -125,5 +127,33 @@ namespace Amaken.Controllers
             
             return Ok(place);
         }
+
+        [HttpGet]
+        [Route("api/[controller]/GetPlaces")]
+        public IActionResult GetPlaces()
+        {
+            var Places = _context.Public_Place.Select(Place => new Public_Place
+            {
+                Description = Place.Description,
+                Images = Place.Images,
+                Latitude = Place.Latitude,
+                Location = Place.Location,
+                Longitude = Place.Longitude,
+                Name = Place.Name,
+                Status = Place.Status,
+                AddedOn = Place.AddedOn,
+                UserEmail = Place.UserEmail,
+                PublicPlaceId = Place.PublicPlaceId
+            });
+            return Ok(Places);
+        }
+        [HttpGet]
+        [Route("api/[controller]/IsNameUnique")]
+        public ActionResult<bool> IsNameUnique(string name)
+        {
+            bool isUnique = !_context.Public_Place.Any(p => p.Name.ToLower() == name.ToLower());
+            return Ok(isUnique);
+        }
+        
     }
 }

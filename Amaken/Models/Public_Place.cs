@@ -27,7 +27,13 @@ namespace Amaken.Models
         [Required]
         public string? Status { get; set; }
         public DateTime AddedOn { get; set; }
-
+        
+        [Required]
+        public double Longitude { get; set; }
+        
+        [Required]
+        public double Latitude { get; set; }
+        
 
     }
 }

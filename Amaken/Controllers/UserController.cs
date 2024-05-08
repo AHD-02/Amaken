@@ -25,7 +25,7 @@ namespace Amaken.Controllers
         
         [HttpPost]
         [Route("api/[controller]/Create")]
-        public IActionResult CreateUser(User newUser)
+        public IActionResult CreateUser([FromBody] User newUser)
         {
             if (ModelState.IsValid)
             {
@@ -54,7 +54,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/Update")]
-        public IActionResult UpdateUser(User newUser)
+        public IActionResult UpdateUser([FromBody] User newUser)
         {
             if (ModelState.IsValid)
             {

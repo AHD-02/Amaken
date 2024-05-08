@@ -26,6 +26,19 @@ namespace Amaken.Models
         [Required]
         public String Status { get; set; } = "Unapproved";
         public DateTime AddedOn { get; set; }
+        
+        [Required]
+        public double Longitude { get; set; }
+        
+        [Required]
+        public double Latitude { get; set; }
+        
+        [Required]
+        public DateTime AvailableFrom { get; set; }
+
+        [Required]
+        public DateTime AvailableTo { get; set; }
+
 
 
     }

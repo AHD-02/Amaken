@@ -16,7 +16,7 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/CreateEvent")]
         [Authorize]
-        public IActionResult CreateEvent(Event newEvent)
+        public IActionResult CreateEvent([FromBody] Event newEvent)
         {
             if (ModelState.IsValid)
             {
@@ -51,7 +51,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/UpdateEvent")]
-        public IActionResult UpdateEvent(Event updatedEvent)
+        public IActionResult UpdateEvent([FromBody] Event updatedEvent)
         {
             if (ModelState.IsValid)
             {
@@ -158,6 +158,12 @@ namespace Amaken.Controllers
             
             return Ok(events);
         }
-
+        [HttpGet]
+        [Route("api/[controller]/IsNameUnique")]
+        public ActionResult<bool> IsNameUnique(string name)
+        {
+            bool isUnique = !_context.Event.Any(p => p.Name.ToLower() == name.ToLower());
+            return Ok(isUnique);
+        }
     }
 }

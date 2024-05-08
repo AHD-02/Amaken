@@ -17,7 +17,7 @@ namespace Amaken.Controllers.Lookups
         [Route("api/[controller]")]
         public IActionResult Get()
         {
-            var countries = _context.Country.Select(country => new CommonTypes.LookupModel
+            var countries = _context.Country.OrderBy(country => country.Name).Select(country => new CommonTypes.LookupModel
             {
                 Label = country.Name,
                 Value = country.Code

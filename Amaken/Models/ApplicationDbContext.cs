@@ -23,6 +23,11 @@ namespace Amaken.Models
         public DbSet<Reservation> Reservation { get; set; }
         public DbSet<City> City { get; set; }
         public DbSet<Country> Country { get; set; }
+        
+        public DbSet<PublicPlacesCategories> PublicPlacesCategories { get; set; }
+        
+        public DbSet<PrivatePlacesCategories> PrivatePlacesCategories { get; set; }
+
 
     }
 }

@@ -15,7 +15,7 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/CreatePriavtePlace")]
         [Authorize]
-        public IActionResult CreatePriavtePlace(Private_Place myPrivate_Place)
+        public IActionResult CreatePriavtePlace([FromBody] Private_Place myPrivate_Place)
         {
             if (ModelState.IsValid)
             {
@@ -72,7 +72,7 @@ namespace Amaken.Controllers
         }
         [HttpPut]
         [Route("api/[controller]/UpdatePriavtePlace")]
-        public IActionResult UpdatePriavtePlace(Private_Place updatedPlace)
+        public IActionResult UpdatePriavtePlace([FromBody] Private_Place updatedPlace)
         {
             if (ModelState.IsValid)
             {
@@ -80,7 +80,11 @@ namespace Amaken.Controllers
                 if (PrivatePlace != null)
                 {
                     updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
+                    updatedPlace.AvailableFrom = DateTime.SpecifyKind(updatedPlace.AvailableFrom, DateTimeKind.Utc);
+                    updatedPlace.AvailableTo = DateTime.SpecifyKind(updatedPlace.AvailableTo, DateTimeKind.Utc);
                     PrivatePlace.UserEmail = updatedPlace.UserEmail;
+                    PrivatePlace.Longitude = updatedPlace.Longitude;
+                    PrivatePlace.Latitude = updatedPlace.Latitude;
                     PrivatePlace.RegisterNumber= updatedPlace.RegisterNumber;
                     PrivatePlace.Location=updatedPlace.Location;
                     PrivatePlace.Description=updatedPlace.Description;
@@ -107,6 +111,28 @@ namespace Amaken.Controllers
             var PrivatePlaces = _context.Private_Place.ToList();
 
             return Ok(PrivatePlaces);
+        }
+        [HttpGet]
+        [Route("api/[controller]/GetPlaces")]
+        public IActionResult GetPlaces()
+        {
+            var Places = _context.Private_Place.Select(Place => new Private_Place
+            {
+                Description = Place.Description,
+                Images = Place.Images,
+                Latitude = Place.Latitude,
+                Location = Place.Location,
+                Longitude = Place.Longitude,
+                PlaceName = Place.PlaceName,
+                Status = Place.Status,
+                AddedOn = Place.AddedOn,
+                UserEmail = Place.UserEmail,
+                PlaceId = Place.PlaceId,
+                AvailableFrom = Place.AvailableFrom,
+                AvailableTo = Place.AvailableTo,
+                RegisterNumber = Place.RegisterNumber
+            });
+            return Ok(Places);
         }
     }
 }
