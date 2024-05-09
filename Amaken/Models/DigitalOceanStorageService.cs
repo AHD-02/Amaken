@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using Amazon.S3.Model;
 
 public class DigitalOceanStorageService
 {
@@ -42,7 +43,14 @@ public class DigitalOceanStorageService
             var fileTransferUtility = new TransferUtility(_s3Client);
 
             await fileTransferUtility.UploadAsync(fileStream, _bucketName, fileName);
-
+            var aclRequest = new PutACLRequest
+            {
+                BucketName = _bucketName,
+                Key = fileName,
+                CannedACL = S3CannedACL.PublicRead
+            };
+            
+            await _s3Client.PutACLAsync(aclRequest);
             return fileName;
         }
         catch (Exception ex)

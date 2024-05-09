@@ -26,15 +26,10 @@ namespace Amaken.Controllers
 
         [HttpPost]
         [Route("api/[controller]/UploadImage")]
-        [Authorize]
         public async Task<IActionResult> UploadImage(IFormFile[] files)
         {
-            
-            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             List <string> ListOfImages = new List<string>();
-            if (MyUser != null)
-            {
+            
                 for (int i = 0; i < files.Length; i++)
                 {
                     _logger.LogInformation("UploadImage method called.");
@@ -59,11 +54,7 @@ namespace Amaken.Controllers
                 string[] ArrayOfImagesUrls = ListOfImages.ToArray();
                 return Ok(ArrayOfImagesUrls);
 
-            }
-            else
-            {
-                return Unauthorized("User isn't authorized");
-            }
+            
 
         }
     }
