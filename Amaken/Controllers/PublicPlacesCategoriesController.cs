@@ -32,10 +32,10 @@ public class PublicPlacesCategoriesController : Controller
     [Route("api/[controller]/GetCategories")]
     public IActionResult GetCategories()
     {
-        var Categories = _context.PublicPlacesCategories.Select(category => new PublicPlacesCategories
+        var Categories = _context.PublicPlacesCategories.Select(category => new CommonTypes.LookupModel
         {
-            ID = category.ID,
-            Name = category.Name
+            Value = category.ID,
+            Label = category.Name
         });
         return Ok(Categories);
     }

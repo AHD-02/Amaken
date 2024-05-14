@@ -1,4 +1,5 @@
 using Amaken.Models;
+using Amaken.Types;
 
 namespace Amaken.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -32,10 +33,10 @@ public class PrivatePlacesCategoriesController : Controller
     [Route("api/[controller]/GetCategories")]
     public IActionResult GetCategories()
     {
-        var Categories = _context.PrivatePlacesCategories.Select(category => new PrivatePlacesCategories
+        var Categories = _context.PrivatePlacesCategories.Select(category => new CommonTypes.LookupModel
         {
-            ID = category.ID,
-            Name = category.Name
+            Value = category.ID,
+            Label = category.Name
         });
         return Ok(Categories);
     }

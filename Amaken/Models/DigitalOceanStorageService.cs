@@ -27,30 +27,28 @@ public class DigitalOceanStorageService
         
     }
 
-    public async Task<string> UploadImageAsync(IFormFile file)
+    public async Task<string> UploadImageAsync(Stream stream, string contentType, string fileName)
     {
         try
         {
-            if (file == null || file.Length == 0)
+            if (stream == null || stream.Length == 0)
             {
-                throw new ArgumentException("File is null or empty.");
+                throw new ArgumentException("Stream is null or empty.");
             }
-
-            using var fileStream = file.OpenReadStream();
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
             var fileTransferUtility = new TransferUtility(_s3Client);
 
-            await fileTransferUtility.UploadAsync(fileStream, _bucketName, fileName);
+            await fileTransferUtility.UploadAsync(stream, _bucketName, fileName);
+
             var aclRequest = new PutACLRequest
             {
                 BucketName = _bucketName,
                 Key = fileName,
                 CannedACL = S3CannedACL.PublicRead
             };
-            
+
             await _s3Client.PutACLAsync(aclRequest);
+
             return fileName;
         }
         catch (Exception ex)

@@ -15,6 +15,22 @@ namespace Amaken.Controllers.Lookups
             _context = context;
         }
 
+        /*[HttpPost]
+        [Route("api/[controller]/AddCities")]
+        public IActionResult AddCities([FromBody] string[] cities)
+        {
+                for (int i =0; i <cities.Length; i++)
+                {
+                    City myCity = new City();
+                    myCity.ID = i+1;
+                    myCity.Country_Code = "8";
+                    myCity.Name = cities[i];
+                    _context.City.Add(myCity);
+                    _context.SaveChanges();
+                }
+
+                return Ok();
+        }*/
 
         [HttpGet]
         [Route("api/[controller]")]

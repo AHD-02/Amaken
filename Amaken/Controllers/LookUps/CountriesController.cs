@@ -22,8 +22,8 @@ namespace Amaken.Controllers.Lookups
                 Label = country.Name,
                 Value = country.Code
             });
-        
-            return Ok(countries);
+            
+            return Ok(countries.Where(u=>u.Label.Equals("Jordan")));
         }
         
     }

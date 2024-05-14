@@ -23,39 +23,52 @@ namespace Amaken.Controllers
             _logger = logger;
             _context = context;
         }
-
+        public class Base64UploadRequest
+        {
+            public string Base { get; set; }
+            public string Name { get; set; }
+        }
         [HttpPost]
         [Route("api/[controller]/UploadImage")]
-        public async Task<IActionResult> UploadImage(IFormFile[] files)
+        public async Task<IActionResult> UploadImage([FromBody] Base64UploadRequest[] base64Requests)
         {
-            List <string> ListOfImages = new List<string>();
-            
-                for (int i = 0; i < files.Length; i++)
+            if (base64Requests == null || base64Requests.Length == 0)
+            {
+                _logger.LogWarning("No base64 images received.");
+                return BadRequest("No base64 images received");
+            }
+
+            List<string> listOfImagesUrls = new List<string>();
+
+            foreach (var request in base64Requests)
+            {
+                _logger.LogInformation("UploadImage method called.");
+
+                byte[] imageBytes;
+                try
                 {
-                    _logger.LogInformation("UploadImage method called.");
-                
-                    if (files[i] == null || files[i].Length == 0)
-                    {
-                        _logger.LogWarning("No file uploaded.");
-                        return BadRequest("No file uploaded");
-                    }
-                
-                    _logger.LogInformation($"Received file: {files[i].FileName}");
-                
-                    var fileName = await _storageService.UploadImageAsync(files[i]);
-                
-                    _logger.LogInformation($"Uploaded file: {fileName}");
-                
-                    var imageUrl = $"{_endpointUrl}/{fileName}";
-                
-                    ListOfImages.Add(imageUrl);
+                    imageBytes = Convert.FromBase64String(request.Base);
+                }
+                catch (FormatException ex)
+                {
+                    _logger.LogError($"Invalid base64 string: {ex.Message}");
+                    return BadRequest($"Invalid base64 string: {ex.Message}");
                 }
 
-                string[] ArrayOfImagesUrls = ListOfImages.ToArray();
-                return Ok(ArrayOfImagesUrls);
+                using (var stream = new MemoryStream(imageBytes))
+                {
+                    var fileName = await _storageService.UploadImageAsync(stream, "image/jpeg", request.Name);
 
-            
+                    _logger.LogInformation($"Uploaded file: {fileName}");
 
+                    var imageUrl = $"{_endpointUrl}/{fileName}";
+
+                    listOfImagesUrls.Add(imageUrl);
+                }
+            }
+
+            string[] arrayOfImagesUrls = listOfImagesUrls.ToArray();
+            return Ok(arrayOfImagesUrls);
         }
     }
 }
