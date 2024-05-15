@@ -16,7 +16,7 @@ namespace Amaken.Controllers
         
         
         [HttpPost]
-        [Route("api/[controller]/CreatePublicPlace")]
+        [Route("api/[controller]/Create")]
         [Authorize]
         public IActionResult CreatePublicPlace([FromBody] Public_Place myPublic_Place)
         {
@@ -44,7 +44,7 @@ namespace Amaken.Controllers
             }
         }
         [HttpPut]
-        [Route("api/[controller]/TriggerPublicPlaceStatus")]
+        [Route("api/[controller]/TriggerStatus")]
         public IActionResult TriggerPublicPlaceStatus(string id, string status)
         {
             if (ModelState.IsValid)
@@ -74,7 +74,7 @@ namespace Amaken.Controllers
             }
         }
         [HttpPut]
-        [Route("api/[controller]/UpdatePublicPlace")]
+        [Route("api/[controller]/Update")]
         public IActionResult UpdatePublicPlace([FromBody] Public_Place updatedPlace)
         {
             if (ModelState.IsValid)
@@ -105,7 +105,7 @@ namespace Amaken.Controllers
             }
         }
         [HttpGet]
-        [Route("api/[controller]/SearchPublicPlaces")]
+        [Route("api/[controller]/Search")]
         public IActionResult SearchPublicPlaces()
         {
             var PublicPlaces = _context.Public_Place.ToList();
@@ -129,7 +129,7 @@ namespace Amaken.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetPlaces")]
+        [Route("api/[controller]/Get")]
         public IActionResult GetPlaces()
         {
             var Places = _context.Public_Place.Select(Place => new Public_Place
