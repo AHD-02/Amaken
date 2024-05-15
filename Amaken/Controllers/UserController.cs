@@ -214,6 +214,69 @@ namespace Amaken.Controllers
             }
            
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/[controller]/MyPublicPlaces")]
+        public IActionResult MyPublicPlaces()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var MyPlaces = _context.Public_Place.Where(u => u.UserEmail!.Equals(userEmail));
+                return Ok(MyPlaces);
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+            
+        }
+        [HttpGet]
+        [Authorize]
+        [Route("api/[controller]/MyEvents")]
+        public IActionResult MyEvents(string status)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            
+            if (MyUser != null)
+            {
+                if (status.ToLower().Equals("running"))
+                {
+                    var MyEvents = 
+                        _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) <= 0 
+                        && u.EventEnd.CompareTo(DateTime.Now)>=0
+                        );
+                    return Ok(MyEvents);
+                }
+                else if (status.ToLower().Equals("upcoming"))
+                {
+                    var MyEvents = 
+                        _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) > 0 
+                                                  && u.EventEnd.CompareTo(DateTime.Now) > 0
+                        );
+                    return Ok(MyEvents);
+                }else if (status.ToLower().Equals("ended"))
+                {
+                    var MyEvents = 
+                        _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) < 0 
+                                                  && u.EventEnd.CompareTo(DateTime.Now)<0
+                        );
+                    return Ok(MyEvents);
+                }
+                else
+                {
+                    return BadRequest("Invalid request");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+            
+        }
         public static string HashPassword (string password)
         {
             using (SHA256 sha256 = SHA256.Create())
