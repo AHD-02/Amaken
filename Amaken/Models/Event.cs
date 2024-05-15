@@ -22,9 +22,9 @@ namespace Amaken.Models
         [Required]
         public string? Description { get; set; }
         [Required]
-        public DateTime EventStart { get; set; }
+        public DateTimeOffset  EventStart { get; set; }
         [Required]
-        public DateTime EventEnd { get; set; }
+        public DateTimeOffset  EventEnd { get; set; }
         [Required]
         public double Fees { get; set; }
         [Required]

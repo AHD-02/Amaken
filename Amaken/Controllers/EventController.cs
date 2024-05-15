@@ -26,8 +26,6 @@ namespace Amaken.Controllers
                 if (MyUser!= null)
                 {
                     var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == newEvent.UserEmail!.ToLower());
-                    newEvent.EventStart = DateTime.SpecifyKind(newEvent.EventStart, DateTimeKind.Utc);
-                    newEvent.EventEnd = DateTime.SpecifyKind(newEvent.EventEnd, DateTimeKind.Utc);
                     if (user != null)
                     {
                         newEvent.Status = "OK";
@@ -55,8 +53,6 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                updatedEvent.EventStart = DateTime.SpecifyKind(updatedEvent.EventStart, DateTimeKind.Utc);
-                updatedEvent.EventEnd = DateTime.SpecifyKind(updatedEvent.EventEnd, DateTimeKind.Utc);
                 var existingEvent = _context.Event.FirstOrDefault(u => u.EventId!.ToLower() == updatedEvent.EventId!.ToLower());
                 if (existingEvent != null)
                 {
@@ -94,8 +90,6 @@ namespace Amaken.Controllers
                 {
                     if (Enum.IsDefined(typeof(EventStatus), newStatus))
                     {
-                        Event.EventStart = DateTime.SpecifyKind(Event.EventStart, DateTimeKind.Utc);
-                        Event.EventEnd = DateTime.SpecifyKind(Event.EventEnd, DateTimeKind.Utc);
                         Event.Status = newStatus;
                         _context.SaveChanges();
                         return Ok("Event status triggered to " + newStatus);
