@@ -191,6 +191,43 @@ namespace Amaken.Controllers
             }
         }
         
+        [HttpPost]
+        [Route("api/[controller]/UnSave")]
+        [Authorize]
+        public IActionResult UnSaveEvent(string eventId)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
+                if (myEvent != null)
+                {
+                    List<string> list = new List<string>(MyUser.SavedEvents ?? new string[0]);
+                    if (list.Contains(eventId))
+                    {
+                        list.Remove(eventId);
+                        MyUser.SavedEvents = list.ToArray();
+                        _context.SaveChanges();
+                        return Ok($"Event {eventId} is removed");
+                    }
+
+                    else
+                    {
+                        return BadRequest("Event isn't saved");
+                    } 
+                }
+                else
+                {
+                    return NotFound("Event wasn't found");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
+        
         [HttpGet]
         [Route("api/[controller]/IsNameUnique")]
         public ActionResult<bool> IsNameUnique(string name)
