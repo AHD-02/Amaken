@@ -154,7 +154,7 @@ namespace Amaken.Controllers
         }
         
         [HttpPost]
-        [Route("api/[controller]/Save")]
+        [Route("api/[controller]/{eventId}/Save")]
         [Authorize]
         public IActionResult SaveEvent(string eventId)
         {
@@ -192,7 +192,7 @@ namespace Amaken.Controllers
         }
         
         [HttpPost]
-        [Route("api/[controller]/UnSave")]
+        [Route("api/[controller]/{eventId}/UnSave")]
         [Authorize]
         public IActionResult UnSaveEvent(string eventId)
         {
