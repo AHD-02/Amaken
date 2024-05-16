@@ -21,7 +21,6 @@ namespace Amaken.Models
         [Required]
         public string[] Images { get; set; } 
         public string? Description { get; set; }
-        [Required]
         public string? UserEmail { get; set; } 
         [Required]
         public String Status { get; set; } = "Unapproved";

@@ -2,6 +2,7 @@
 using Amaken.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Controllers
 {
@@ -11,6 +12,18 @@ namespace Amaken.Controllers
         public Private_PlaceController(ApplicationDbContext context)
         {
             _context = context;
+        }
+        public int GetLastId()
+        {
+            using (var context = new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>()))
+            {
+                return context.Private_Place
+                    .AsEnumerable() 
+                    .Where(x => int.TryParse(x.PlaceId, out _)) 
+                    .OrderByDescending(x => int.Parse(x.PlaceId!)) 
+                    .Select(x => int.Parse(x.PlaceId!)) 
+                    .FirstOrDefault(); 
+            }
         }
         [HttpPost]
         [Route("api/[controller]/CreatePriavtePlace")]
@@ -24,8 +37,11 @@ namespace Amaken.Controllers
                 if (MyUser != null)
                 {
                     
-                myPrivate_Place.AddedOn = DateTime.SpecifyKind(myPrivate_Place.AddedOn, DateTimeKind.Utc);
+                myPrivate_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPrivate_Place.Status = "Unapproved";
+                myPrivate_Place.UserEmail = MyUser.Email;
+                int lastId = GetLastId();
+                myPrivate_Place.PlaceId = $"{lastId + 1}";
                 _context.Private_Place.Add(myPrivate_Place);
                 _context.SaveChanges();
                 return Ok("Private place was added successfully, needs admin's approval");

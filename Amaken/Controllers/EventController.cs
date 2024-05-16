@@ -13,6 +13,18 @@ namespace Amaken.Controllers
         {
             _context = context; 
         }
+        public int GetLastId()
+        {
+            using (var context = new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>()))
+            {
+                return context.Event
+                    .AsEnumerable() 
+                    .Where(x => int.TryParse(x.EventId, out _)) 
+                    .OrderByDescending(x => int.Parse(x.EventId!)) 
+                    .Select(x => int.Parse(x.EventId!)) 
+                    .FirstOrDefault(); 
+            }
+        }
         [HttpPost]
         [Route("api/[controller]/CreateEvent")]
         [Authorize]
@@ -25,18 +37,14 @@ namespace Amaken.Controllers
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser!= null)
                 {
-                    var user = _context.User.FirstOrDefault(u => u.Email!.ToLower() == newEvent.UserEmail!.ToLower());
-                    if (user != null)
-                    {
-                        newEvent.Status = "OK";
-                        _context.Event.Add(newEvent);
-                        _context.SaveChanges();
-                        return Ok("Event is created");
-                    }
-                    else
-                    {
-                        return NotFound("User wasn't found");
-                    }
+                    int lastId = GetLastId();
+                    newEvent.EventId = $"{lastId + 1}";
+                    newEvent.Status = "OK";
+                    newEvent.UserEmail = MyUser.Email;
+                    _context.Event.Add(newEvent);
+                    _context.SaveChanges();
+                    return Ok("Event is created");
+                    
                 }
                 else
                 {

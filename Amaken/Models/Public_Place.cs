@@ -22,9 +22,7 @@ namespace Amaken.Models
         public string? Location { get; set; }
         [Required]
         public string? Name { get; set; }
-        [Required]
         public string? UserEmail { get; set; }
-        [Required]
         public string? Status { get; set; }
         public DateTime? AddedOn { get; set; }
         

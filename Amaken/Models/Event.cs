@@ -27,9 +27,7 @@ namespace Amaken.Models
         public DateTimeOffset  EventEnd { get; set; }
         [Required]
         public double Fees { get; set; }
-        [Required]
         public string? UserEmail { get; set; }
-        [Required]
         public string Status { get; set; } = "OK";
         [Required]
         public string[] Images { get; set; } 

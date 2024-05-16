@@ -1,23 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Amaken.Models
 {
-    public enum UserStatus
-    {
-        OK,
-        Deleted,
-        Suspended
-    }
-    public class User
+    
+    public class UserCreateDto
     {
 
         [Key]
         public string? Email { get; set; }
         [Required]
-        [JsonIgnore]
         public string? Password { get; set; }
         [Required]
         public string? FirstName { get; set; }
@@ -36,26 +30,8 @@ namespace Amaken.Models
 
         [Required]
         public string? Status { get; set; } = "OK";
-
-        public User(UserCreateDto createUserDto)
-        {
-            this.City = createUserDto.City;
-            this.Status = createUserDto.Status;
-            this.Email = createUserDto.Email;
-            this.FirstName = createUserDto.FirstName;
-            this.Country = createUserDto.Country;
-            this.Images = createUserDto.Images;
-            this.Password = createUserDto.Password;
-            this.Phone = createUserDto.Phone;
-            this.LastName = createUserDto.LastName;
-            this.SavedEvents = createUserDto.SavedEvents;
-            this.DateOfBirth = createUserDto.DateOfBirth;
-        }
-
-        public User()
-        {
-            
-        }
+        
+        
 
 
     }

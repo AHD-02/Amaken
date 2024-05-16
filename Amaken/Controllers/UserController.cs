@@ -25,7 +25,7 @@ namespace Amaken.Controllers
         
         [HttpPost]
         [Route("api/[controller]/Create")]
-        public IActionResult CreateUser([FromBody] User newUser)
+        public IActionResult CreateUser([FromBody] UserCreateDto newUser)
         {
             if (ModelState.IsValid)
             {
@@ -34,7 +34,8 @@ namespace Amaken.Controllers
                     newUser.DateOfBirth = DateTime.SpecifyKind(newUser.DateOfBirth, DateTimeKind.Utc);
                     newUser.Status = "OK";
                     newUser.Password = HashPassword(newUser.Password!);
-                    _context.User.Add(newUser);
+                    User myNewUser = new User(newUser);
+                    _context.User.Add(myNewUser);
                     _context.SaveChanges();
                     var jwtSecret = _configuration["Jwt:Secret"];
                     var token = GenerateJwtToken(newUser.Email!, jwtSecret);

@@ -14,7 +14,18 @@ namespace Amaken.Controllers
             _context = context;
         }
         
-        
+        public int GetLastId()
+        {
+            using (var context = new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>()))
+            {
+                return context.Public_Place
+                    .AsEnumerable() 
+                    .Where(x => int.TryParse(x.PublicPlaceId, out _)) 
+                    .OrderByDescending(x => int.Parse(x.PublicPlaceId!)) 
+                    .Select(x => int.Parse(x.PublicPlaceId!)) 
+                    .FirstOrDefault(); 
+            }
+        }
         [HttpPost]
         [Route("api/[controller]/Create")]
         [Authorize]
@@ -25,9 +36,12 @@ namespace Amaken.Controllers
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
-                {   
+                { 
+                int lastId = GetLastId();
+                myPublic_Place.PublicPlaceId = $"{lastId + 1}";
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
+                myPublic_Place.UserEmail = MyUser.Email;
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
                 return Ok("Public place was added successfully");
@@ -126,7 +140,7 @@ namespace Amaken.Controllers
             
             return Ok(place);
         }
-
+        
         [HttpGet]
         [Route("api/[controller]/Get")]
         public IActionResult GetPlaces()
