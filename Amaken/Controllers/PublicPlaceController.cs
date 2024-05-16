@@ -25,9 +25,8 @@ namespace Amaken.Controllers
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
-                {
-                    
-                myPublic_Place.AddedOn = DateTime.SpecifyKind(myPublic_Place.AddedOn, DateTimeKind.Utc);
+                {   
+                myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
@@ -82,7 +81,6 @@ namespace Amaken.Controllers
                 var PublicPlace = _context.Public_Place.FirstOrDefault(u => u.PublicPlaceId!.Equals(updatedPlace.PublicPlaceId));
                 if (PublicPlace != null)
                 {
-                    updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
                     PublicPlace.UserEmail = updatedPlace.UserEmail;
                     PublicPlace.Longitude = updatedPlace.Longitude;
                     PublicPlace.Latitude = updatedPlace.Latitude;
@@ -91,6 +89,7 @@ namespace Amaken.Controllers
                     PublicPlace.Status = updatedPlace.Status;
                     PublicPlace.Name = updatedPlace.Name;
                     PublicPlace.Images = updatedPlace.Images;
+                    PublicPlace.CategoryID = updatedPlace.CategoryID;
                     _context.SaveChanges();
                     return Ok("Public place was updated successfully");
                 }
@@ -134,6 +133,7 @@ namespace Amaken.Controllers
         {
             var Places = _context.Public_Place.Select(Place => new Public_Place
             {
+                CategoryID = Place.CategoryID,
                 Description = Place.Description,
                 Images = Place.Images,
                 Latitude = Place.Latitude,
@@ -144,6 +144,7 @@ namespace Amaken.Controllers
                 AddedOn = Place.AddedOn,
                 UserEmail = Place.UserEmail,
                 PublicPlaceId = Place.PublicPlaceId
+                
             });
             return Ok(Places);
         }

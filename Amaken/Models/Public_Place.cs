@@ -26,14 +26,15 @@ namespace Amaken.Models
         public string? UserEmail { get; set; }
         [Required]
         public string? Status { get; set; }
-        public DateTime AddedOn { get; set; }
+        public DateTime? AddedOn { get; set; }
         
         [Required]
         public double Longitude { get; set; }
         
         [Required]
         public double Latitude { get; set; }
-        
+        [Required]
+        public string CategoryID { get; set; }
 
     }
 }
