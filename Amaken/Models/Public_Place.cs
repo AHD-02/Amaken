@@ -19,8 +19,6 @@ namespace Amaken.Models
         [Required]
         public string[] Images { get; set; } 
         [Required]
-        public string? Location { get; set; }
-        [Required]
         public string? Name { get; set; }
         public string? UserEmail { get; set; }
         public string? Status { get; set; }

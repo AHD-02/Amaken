@@ -98,7 +98,6 @@ namespace Amaken.Controllers
                     PublicPlace.UserEmail = updatedPlace.UserEmail;
                     PublicPlace.Longitude = updatedPlace.Longitude;
                     PublicPlace.Latitude = updatedPlace.Latitude;
-                    PublicPlace.Location = updatedPlace.Location;
                     PublicPlace.Description = updatedPlace.Description;
                     PublicPlace.Status = updatedPlace.Status;
                     PublicPlace.Name = updatedPlace.Name;
@@ -151,14 +150,12 @@ namespace Amaken.Controllers
                 Description = Place.Description,
                 Images = Place.Images,
                 Latitude = Place.Latitude,
-                Location = Place.Location,
                 Longitude = Place.Longitude,
                 Name = Place.Name,
                 Status = Place.Status,
                 AddedOn = Place.AddedOn,
                 UserEmail = Place.UserEmail,
                 PublicPlaceId = Place.PublicPlaceId
-                
             });
             return Ok(Places);
         }
