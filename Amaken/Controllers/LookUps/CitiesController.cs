@@ -33,7 +33,7 @@ namespace Amaken.Controllers.Lookups
         }*/
 
         [HttpGet]
-        [Route("api/[controller]")]
+        [Route("api/[controller]/{countryCode}")]
         public IActionResult Get(string countryCode)
         {
             if (countryCode == "")
