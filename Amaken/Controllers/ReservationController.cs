@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+
 namespace Amaken.Controllers
 {
     public class ReservationController : Controller
@@ -11,6 +13,18 @@ namespace Amaken.Controllers
         public ReservationController(ApplicationDbContext context)
         {
             _context = context;
+        }
+        public int GetLastId()
+        {
+            using (var context = new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>()))
+            {
+                return context.Reservation
+                    .AsEnumerable() 
+                    .Where(x => int.TryParse(x.ReservationId, out _)) 
+                    .OrderByDescending(x => int.Parse(x.ReservationId!)) 
+                    .Select(x => int.Parse(x.ReservationId!)) 
+                    .FirstOrDefault(); 
+            }
         }
         [HttpPost]
         [Route("api/[controller]/CreateReservation")]
@@ -27,8 +41,10 @@ namespace Amaken.Controllers
                         u.EventId!.ToLower().Equals(myReservation.EventId!.ToLower()));
                     if (Event != null)
                     {
+                        int lastId = GetLastId();
+                        myReservation.ReservationId = $"{lastId + 1}";
                         myReservation.DateOfReservation =
-                            DateTime.SpecifyKind(myReservation.DateOfReservation, DateTimeKind.Utc);
+                            DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                         myReservation.UserEmail = MyUser.Email;
                         myReservation.Status = "OK";
                         _context.Reservation.Add(myReservation);
@@ -65,7 +81,7 @@ namespace Amaken.Controllers
                 {
                     if (Enum.IsDefined(typeof(ReservationStatus), newStatus))
                     {
-                        Reservation.DateOfReservation = DateTime.SpecifyKind(Reservation.DateOfReservation, DateTimeKind.Utc);
+                        Reservation.DateOfReservation = DateTime.SpecifyKind((DateTime)Reservation.DateOfReservation, DateTimeKind.Utc);
                         Reservation.Status = newStatus;
                         _context.SaveChanges();
                         return Ok("Reservation status triggered to " + newStatus);
@@ -95,7 +111,7 @@ namespace Amaken.Controllers
                 var Reservation = _context.Reservation.FirstOrDefault(u => u.ReservationId == myReservation.ReservationId);
                 if (Reservation != null)
                 {
-                    myReservation.DateOfReservation = DateTime.SpecifyKind(myReservation.DateOfReservation, DateTimeKind.Utc);
+                    myReservation.DateOfReservation = DateTime.SpecifyKind((DateTime)myReservation.DateOfReservation, DateTimeKind.Utc);
                     Reservation.UserEmail = myReservation.UserEmail;
                     Reservation.DateOfReservation = myReservation.DateOfReservation;
                     Reservation.EventId = myReservation.EventId;

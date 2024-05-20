@@ -15,8 +15,7 @@ namespace Amaken.Models
         public string? ReservationId { get; set; }
         public string? EventId { get; set; }
         public string? UserEmail { get; set; }
-        public DateTime DateOfReservation { get; set; }
-        [Required]
+        public DateTime? DateOfReservation { get; set; }
         public string? Status { get; set; } = "OK";
     }
 }
