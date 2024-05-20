@@ -155,10 +155,15 @@ namespace Amaken.Controllers
                 .AsNoTracking()
                 .Where(e => e.EventId == id)
                 .FirstOrDefaultAsync();
+            var place =  _context.Public_Place.Where(u => u.PublicPlaceId.Equals(events.Location))
+                .FirstOrDefault();
+            EventGetDto myNewEvent = new EventGetDto(events);
+            myNewEvent.Latitude = place.Latitude;
+            myNewEvent.Longitude = place.Longitude;
             if (events == null)
                 throw new Exception($"Event with id {id} was not found");
             
-            return Ok(events);
+            return Ok(myNewEvent);
         }
         
         [HttpPost]
