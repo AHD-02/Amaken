@@ -9,9 +9,11 @@ namespace Amaken.Controllers
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public EventController(ApplicationDbContext context)
+        private readonly NotificationController _NotificationController;
+        public EventController(ApplicationDbContext context, NotificationController NotificationController)
         {
-            _context = context; 
+            _context = context;
+            _NotificationController = NotificationController;
         }
         public int GetLastId()
         {
@@ -34,7 +36,7 @@ namespace Amaken.Controllers
             {
                 
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser!= null)
                 {
                     int lastId = GetLastId();
@@ -43,6 +45,7 @@ namespace Amaken.Controllers
                     newEvent.UserEmail = MyUser.Email;
                     _context.Event.Add(newEvent);
                     _context.SaveChanges();
+                    _NotificationController.PushNotifications($"The event {newEvent.Name} was added");
                     return Ok("Event is created");
                     
                 }
@@ -61,7 +64,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingEvent = _context.Event.FirstOrDefault(u => u.EventId!.ToLower() == updatedEvent.EventId!.ToLower());
+                var existingEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.ToLower() == updatedEvent.EventId!.ToLower());
                 if (existingEvent != null)
                 {
                     existingEvent.Name = updatedEvent.Name;
@@ -93,7 +96,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var Event = _context.Event.FirstOrDefault(u => u.EventId!.ToLower().Equals(EventId.ToLower()));
+                var Event = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.ToLower().Equals(EventId.ToLower()));
                 if (Event != null)
                 {
                     if (Enum.IsDefined(typeof(EventStatus), newStatus))
@@ -131,7 +134,7 @@ namespace Amaken.Controllers
         public async Task<IActionResult> SearchSavedEvents()
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var user = await _context.User.FirstOrDefaultAsync(u => u.Email == userEmail);
+            var user = await _context.User.AsNoTracking().FirstOrDefaultAsync(u => u.Email == userEmail);
 
             if (user == null)
                 throw new UnauthorizedAccessException("User was not found");
@@ -166,7 +169,7 @@ namespace Amaken.Controllers
             }
             else if (TypeOfEventPlace.Equals("Public"))
             {
-            var place =  _context.Public_Place.Where(u => u.PublicPlaceId.Equals(events.PlaceID))
+            var place =  _context.Public_Place.AsNoTracking().Where(u => u.PublicPlaceId.Equals(events.PlaceID))
                 .FirstOrDefault();
             myNewEvent.Latitude = place.Latitude;
             myNewEvent.Longitude = place.Longitude;
@@ -187,10 +190,10 @@ namespace Amaken.Controllers
         public IActionResult SaveEvent(string eventId)
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
+                var myEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.Equals(eventId));
                 if (myEvent != null)
                 {
                    
@@ -225,10 +228,10 @@ namespace Amaken.Controllers
         public IActionResult UnSaveEvent(string eventId)
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
+                var myEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.Equals(eventId));
                 if (myEvent != null)
                 {
                     List<string> list = new List<string>(MyUser.SavedEvents ?? new string[0]);
@@ -260,7 +263,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/IsNameUnique")]
         public ActionResult<bool> IsNameUnique(string name)
         {
-            bool isUnique = !_context.Event.Any(p => p.Name.ToLower() == name.ToLower());
+            bool isUnique = !_context.Event.AsNoTracking().Any(p => p.Name.ToLower() == name.ToLower());
             return Ok(isUnique);
         }
     }

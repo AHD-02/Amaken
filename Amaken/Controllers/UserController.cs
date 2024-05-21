@@ -9,6 +9,7 @@ using Amaken.Types;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Controllers
 {
@@ -189,8 +190,26 @@ namespace Amaken.Controllers
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var MyPlaces = _context.Public_Place.Where(u => u.UserEmail!.Equals(userEmail));
+                var MyPlaces = _context.Public_Place.AsNoTracking().Where(u => u.UserEmail!.Equals(userEmail));
                 return Ok(MyPlaces);
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+            
+        }
+        [HttpGet]
+        [Authorize]
+        [Route("api/[controller]/MyNotifications")]
+        public IActionResult MyNotifications()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var MyNotifications = _context.Notification.AsNoTracking().Where(u => u.UserEmail!.Equals(MyUser.Email));
+                return Ok(MyNotifications);
             }
             else
             {
@@ -258,6 +277,7 @@ namespace Amaken.Controllers
                 return builder.ToString();
             }
         }
+        
         
         /*static string CheckPassword(string password)
         {

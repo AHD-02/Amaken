@@ -17,7 +17,6 @@ namespace Amaken.Models
         public string? PlaceId { get; set; }
         public string? RegisterNumber { get; set; }
         public string? PlaceName { get; set; }
-        public string? Location { get; set; }
         [Required]
         public string[] Images { get; set; } 
         public string? Description { get; set; }

@@ -3,15 +3,18 @@ using Amaken.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Amaken.Controllers;
 
 namespace Amaken.Controllers
 {
     public class Public_PlaceController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public Public_PlaceController(ApplicationDbContext context)
+        private readonly NotificationController _NotificationController;
+        public Public_PlaceController(ApplicationDbContext context, NotificationController NotificationController)
         {
             _context = context;
+            _NotificationController = NotificationController;
         }
         
         public int GetLastId()
@@ -20,16 +23,16 @@ namespace Amaken.Controllers
             {
                 return context.Public_Place
                     .AsEnumerable() 
-                    .Where(x => int.TryParse(x.PublicPlaceId, out _)) 
-                    .OrderByDescending(x => int.Parse(x.PublicPlaceId!)) 
-                    .Select(x => int.Parse(x.PublicPlaceId!)) 
+                    .Where(x => int.TryParse(x.PublicPlaceId.Split("-")[1], out _)) 
+                    .OrderByDescending(x => int.Parse(x.PublicPlaceId.Split("-")[1]!)) 
+                    .Select(x => int.Parse(x.PublicPlaceId.Split("-")[1]!)) 
                     .FirstOrDefault(); 
             }
         }
         [HttpPost]
         [Route("api/[controller]/Create")]
         [Authorize]
-        public IActionResult CreatePublicPlace([FromBody] Public_Place myPublic_Place)
+        public IActionResult Create([FromBody] Public_Place myPublic_Place)
         {
             if (ModelState.IsValid)
             {
@@ -39,11 +42,13 @@ namespace Amaken.Controllers
                 { 
                 int lastId = GetLastId();
                 myPublic_Place.PublicPlaceId = $"Public-{lastId + 1}";
+                Console.WriteLine(myPublic_Place.PublicPlaceId);
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 myPublic_Place.UserEmail = MyUser.Email;
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
+                _NotificationController.PushNotifications($"The public place {myPublic_Place.Name} was added");
                 return Ok("Public place was added successfully");
                 }
                 else
@@ -62,7 +67,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PublicPlace = _context.Public_Place.FirstOrDefault(u => u.PublicPlaceId!.Equals(id));
+                var PublicPlace = _context.Public_Place.AsNoTracking().FirstOrDefault(u => u.PublicPlaceId!.Equals(id));
                 if (PublicPlace != null)
                 {
                     if (Enum.IsDefined(typeof(Public_Place_Status), status))
@@ -144,7 +149,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/Get")]
         public IActionResult GetPlaces()
         {
-            var Places = _context.Public_Place.Select(Place => new Public_Place
+            var Places = _context.Public_Place.AsNoTracking().Select(Place => new Public_Place
             {
                 CategoryID = Place.CategoryID,
                 Description = Place.Description,
@@ -163,7 +168,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/IsNameUnique")]
         public ActionResult<bool> IsNameUnique(string name)
         {
-            bool isUnique = !_context.Public_Place.Any(p => p.Name.ToLower() == name.ToLower());
+            bool isUnique = !_context.Public_Place.AsNoTracking().Any(p => p.Name.ToLower() == name.ToLower());
             return Ok(isUnique);
         }
         

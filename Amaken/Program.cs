@@ -3,9 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Amaken.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+builder.Services.AddScoped<NotificationController>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder => builder

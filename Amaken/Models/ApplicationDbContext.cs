@@ -27,6 +27,7 @@ namespace Amaken.Models
         public DbSet<PublicPlacesCategories> PublicPlacesCategories { get; set; }
         
         public DbSet<PrivatePlacesCategories> PrivatePlacesCategories { get; set; }
+        public DbSet<Notification> Notification { get; set; }
         public DbSet<EventCategories> EventCategories { get; set; }
 
 

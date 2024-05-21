@@ -9,9 +9,11 @@ namespace Amaken.Controllers
     public class Private_PlaceController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public Private_PlaceController(ApplicationDbContext context)
+        private readonly NotificationController _NotificationController;
+        public Private_PlaceController(ApplicationDbContext context, NotificationController NotificationController)
         {
             _context = context;
+            _NotificationController = NotificationController;
         }
         public int GetLastId()
         {
@@ -19,9 +21,9 @@ namespace Amaken.Controllers
             {
                 return context.Private_Place
                     .AsEnumerable() 
-                    .Where(x => int.TryParse(x.PlaceId, out _)) 
-                    .OrderByDescending(x => int.Parse(x.PlaceId!)) 
-                    .Select(x => int.Parse(x.PlaceId!)) 
+                    .Where(x => int.TryParse(x.PlaceId.Split("-")[1], out _)) 
+                    .OrderByDescending(x => int.Parse(x.PlaceId!.Split("-")[1])) 
+                    .Select(x => int.Parse(x.PlaceId!.Split("-")[1])) 
                     .FirstOrDefault(); 
             }
         }
@@ -33,7 +35,7 @@ namespace Amaken.Controllers
             if (ModelState.IsValid)
             {
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+                var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
                 {
                     
@@ -44,6 +46,7 @@ namespace Amaken.Controllers
                 myPrivate_Place.PlaceId = $"Private-{lastId + 1}";
                 _context.Private_Place.Add(myPrivate_Place);
                 _context.SaveChanges();
+                _NotificationController.PushNotifications($"The private place {myPrivate_Place.PlaceName} was added");
                 return Ok("Private place was added successfully, needs admin's approval");
                 }
                 else
@@ -62,7 +65,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(id));
+                var PrivatePlace = _context.Private_Place.AsNoTracking().FirstOrDefault(u => u.PlaceId!.Equals(id));
                 if (PrivatePlace != null)
                 {
                     if (Enum.IsDefined(typeof(Private_Place_Status), status))
@@ -92,7 +95,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(updatedPlace.PlaceId));
+                var PrivatePlace = _context.Private_Place.AsNoTracking().FirstOrDefault(u => u.PlaceId!.Equals(updatedPlace.PlaceId));
                 if (PrivatePlace != null)
                 {
                     updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
@@ -102,7 +105,6 @@ namespace Amaken.Controllers
                     PrivatePlace.Longitude = updatedPlace.Longitude;
                     PrivatePlace.Latitude = updatedPlace.Latitude;
                     PrivatePlace.RegisterNumber= updatedPlace.RegisterNumber;
-                    PrivatePlace.Location=updatedPlace.Location;
                     PrivatePlace.Description=updatedPlace.Description;
                     PrivatePlace.Status=updatedPlace.Status;
                     PrivatePlace.PlaceName=updatedPlace.PlaceName;
@@ -132,12 +134,11 @@ namespace Amaken.Controllers
         [Route("api/[controller]/GetPlaces")]
         public IActionResult GetPlaces()
         {
-            var Places = _context.Private_Place.Select(Place => new Private_Place
+            var Places = _context.Private_Place.AsNoTracking().Select(Place => new Private_Place
             {
                 Description = Place.Description,
                 Images = Place.Images,
                 Latitude = Place.Latitude,
-                Location = Place.Location,
                 Longitude = Place.Longitude,
                 PlaceName = Place.PlaceName,
                 Status = Place.Status,
