@@ -261,6 +261,26 @@ namespace Amaken.Controllers
             }
             
         }
+        [HttpGet]
+        [Authorize]
+        [Route("api/[controller]/MyAllEvents")]
+        public IActionResult MyAllEvents()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            
+            if (MyUser != null)
+            {
+                var MyEvents = _context.Event.ToList();
+                return Ok(MyEvents);
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+            
+        }
+        
         public static string HashPassword (string password)
         {
             using (SHA256 sha256 = SHA256.Create())
