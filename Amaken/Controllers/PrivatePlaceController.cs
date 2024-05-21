@@ -41,7 +41,7 @@ namespace Amaken.Controllers
                 myPrivate_Place.Status = "Unapproved";
                 myPrivate_Place.UserEmail = MyUser.Email;
                 int lastId = GetLastId();
-                myPrivate_Place.PlaceId = $"{lastId + 1}";
+                myPrivate_Place.PlaceId = $"Private-{lastId + 1}";
                 _context.Private_Place.Add(myPrivate_Place);
                 _context.SaveChanges();
                 return Ok("Private place was added successfully, needs admin's approval");

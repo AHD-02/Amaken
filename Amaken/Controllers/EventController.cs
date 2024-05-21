@@ -65,7 +65,7 @@ namespace Amaken.Controllers
                 if (existingEvent != null)
                 {
                     existingEvent.Name = updatedEvent.Name;
-                    existingEvent.Location = updatedEvent.Location;
+                    existingEvent.PlaceID = updatedEvent.PlaceID;
                     existingEvent.EventType = updatedEvent.EventType;
                     existingEvent.Description = updatedEvent.Description;
                     existingEvent.EventStart = updatedEvent.EventStart;
@@ -155,11 +155,26 @@ namespace Amaken.Controllers
                 .AsNoTracking()
                 .Where(e => e.EventId == id)
                 .FirstOrDefaultAsync();
-            var place =  _context.Public_Place.Where(u => u.PublicPlaceId.Equals(events.Location))
-                .FirstOrDefault();
+            string TypeOfEventPlace = events.PlaceID.Split("-")[0];
             EventGetDto myNewEvent = new EventGetDto(events);
+            if (TypeOfEventPlace.Equals("Private"))
+            {
+                var place =  _context.Private_Place.Where(u => u.PlaceId.Equals(events.PlaceID))
+                    .FirstOrDefault();
             myNewEvent.Latitude = place.Latitude;
             myNewEvent.Longitude = place.Longitude;
+            }
+            else if (TypeOfEventPlace.Equals("Public"))
+            {
+            var place =  _context.Public_Place.Where(u => u.PublicPlaceId.Equals(events.PlaceID))
+                .FirstOrDefault();
+            myNewEvent.Latitude = place.Latitude;
+            myNewEvent.Longitude = place.Longitude;
+            }
+            else
+            {
+                return BadRequest("Place ID isn't valid");
+            }
             if (events == null)
                 throw new Exception($"Event with id {id} was not found");
             

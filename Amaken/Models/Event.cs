@@ -16,7 +16,7 @@ namespace Amaken.Models
         [Required]
         public string? Name { get; set; }
         [Required]
-        public string? Location { get; set; }
+        public string? PlaceID { get; set; }
         [Required]
         public string? EventType { get; set; }
         [Required]

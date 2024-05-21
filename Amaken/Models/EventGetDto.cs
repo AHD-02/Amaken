@@ -10,7 +10,7 @@ namespace Amaken.Models
         [Required]
         public string? Name { get; set; }
         [Required]
-        public string? Location { get; set; }
+        public string? PlaceID { get; set; }
         [Required]
         public string? EventType { get; set; }
         [Required]
@@ -38,7 +38,7 @@ namespace Amaken.Models
             this.EventId = myEvent.EventId;
             this.EventType = myEvent.EventType;
             this.Status = myEvent.Status;
-            this.Location = myEvent.Location;
+            this.PlaceID = myEvent.PlaceID;
             this.Images = myEvent.Images;
             this.Fees = myEvent.Fees;
             this.EventEnd = myEvent.EventEnd;
