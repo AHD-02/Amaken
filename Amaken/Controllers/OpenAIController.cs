@@ -33,7 +33,7 @@ public class OpenAIController : Controller
             return BadRequest("Not found");
         }
     }
-    /*[HttpPost]
+    [HttpPost]
     [Route("api/[controller]/GenerateEventImages")]
     public IActionResult GenerateEventImages([FromBody] string UserDescription)
     {
@@ -58,5 +58,5 @@ public class OpenAIController : Controller
         {
             return BadRequest("Not found");
         }
-    }*/
+    }
 }

@@ -39,15 +39,15 @@ namespace Amaken.Controllers
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
-                { 
-                int lastId = GetLastId();
-                myPublic_Place.PublicPlaceId = $"Public-{lastId + 1}";
+                {
+                //int lastId = GetLastId();
+                myPublic_Place.PublicPlaceId = $"Public-{100 + 1}";
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 myPublic_Place.UserEmail = MyUser.Email;
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
-                _NotificationController.PushNotifications($"The public place {myPublic_Place.Name} was added");
+               // _NotificationController.PushNotifications($"The public place {myPublic_Place.Name} was added");
                 return Ok("Public place was added successfully");
                 }
                 else
