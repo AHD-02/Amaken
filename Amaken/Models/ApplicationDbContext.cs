@@ -23,13 +23,20 @@ namespace Amaken.Models
         public DbSet<Reservation> Reservation { get; set; }
         public DbSet<City> City { get; set; }
         public DbSet<Country> Country { get; set; }
+        public DbSet<PlacesRates> PlacesRates { get; set; }
         
         public DbSet<PublicPlacesCategories> PublicPlacesCategories { get; set; }
         
         public DbSet<PrivatePlacesCategories> PrivatePlacesCategories { get; set; }
         public DbSet<Notification> Notification { get; set; }
         public DbSet<EventCategories> EventCategories { get; set; }
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<PlacesRates>()
+                .HasKey(pr => new { pr.UserEmail, pr.PlaceId });
+        }
 
     }
 }

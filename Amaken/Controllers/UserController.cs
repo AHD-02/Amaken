@@ -190,7 +190,8 @@ namespace Amaken.Controllers
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var MyPlaces = _context.Public_Place.AsNoTracking().Where(u => u.UserEmail!.Equals(userEmail));
+                var MyPlaces = _context.Public_Place.Where(u => u.UserEmail!.Equals(userEmail)).ToList();
+                MyPlaces = MyPlaces.OrderByDescending(e => e.AddedOn).ToList();
                 return Ok(MyPlaces);
             }
             else
@@ -208,7 +209,7 @@ namespace Amaken.Controllers
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var MyNotifications = _context.Notification.AsNoTracking().Where(u => u.UserEmail!.Equals(MyUser.Email));
+                var MyNotifications = _context.Notification.Where(u => u.UserEmail!.Equals(MyUser.Email));
                 return Ok(MyNotifications);
             }
             else
@@ -224,7 +225,6 @@ namespace Amaken.Controllers
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
-            
             if (MyUser != null)
             {
                 if (status.ToLower().Equals("running"))
@@ -232,7 +232,8 @@ namespace Amaken.Controllers
                     var MyEvents = 
                         _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) <= 0 
                         && u.EventEnd.CompareTo(DateTime.Now)>=0
-                        );
+                        ).ToList();
+                    MyEvents = MyEvents.OrderByDescending(e => e.CreatedOn).ToList();
                     return Ok(MyEvents);
                 }
                 else if (status.ToLower().Equals("upcoming"))
@@ -240,14 +241,16 @@ namespace Amaken.Controllers
                     var MyEvents = 
                         _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) > 0 
                                                   && u.EventEnd.CompareTo(DateTime.Now) > 0
-                        );
+                        ).ToList();
+                    MyEvents = MyEvents.OrderByDescending(e => e.CreatedOn).ToList();
                     return Ok(MyEvents);
                 }else if (status.ToLower().Equals("ended"))
                 {
                     var MyEvents = 
                         _context.Event.Where(u => u.EventStart.CompareTo(DateTime.Now) < 0 
                                                   && u.EventEnd.CompareTo(DateTime.Now)<0
-                        );
+                        ).ToList();
+                    MyEvents = MyEvents.OrderByDescending(e => e.CreatedOn).ToList();
                     return Ok(MyEvents);
                 }
                 else
