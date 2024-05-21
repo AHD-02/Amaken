@@ -33,6 +33,8 @@ namespace Amaken.Models
         public string? Country { get; set; }
         [Required]
         public string? City { get; set; }
+        [Required]
+        public string[]? Intrests { get; set; }
 
         [Required]
         public string? Status { get; set; } = "OK";
@@ -50,6 +52,7 @@ namespace Amaken.Models
             this.LastName = createUserDto.LastName;
             this.SavedEvents = createUserDto.SavedEvents;
             this.DateOfBirth = createUserDto.DateOfBirth;
+            this.Intrests = createUserDto.Intrests;
         }
 
         public User()
