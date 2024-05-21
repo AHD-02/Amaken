@@ -42,7 +42,6 @@ namespace Amaken.Controllers
                 { 
                 int lastId = GetLastId();
                 myPublic_Place.PublicPlaceId = $"Public-{lastId + 1}";
-                Console.WriteLine(myPublic_Place.PublicPlaceId);
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 myPublic_Place.UserEmail = MyUser.Email;
