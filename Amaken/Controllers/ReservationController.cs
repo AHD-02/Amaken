@@ -37,7 +37,7 @@ namespace Amaken.Controllers
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
                 {
-                    var Event = _context.Event.FirstOrDefault(u =>
+                    var Event = _context.Event.AsNoTracking().FirstOrDefault(u =>
                         u.EventId!.ToLower().Equals(myReservation.EventId!.ToLower()));
                     if (Event != null)
                     {
