@@ -173,6 +173,7 @@ namespace Amaken.Controllers
                 .FirstOrDefault();
             myNewEvent.Latitude = place.Latitude;
             myNewEvent.Longitude = place.Longitude;
+            myNewEvent.PlaceName = place.Name;
             }
             else
             {

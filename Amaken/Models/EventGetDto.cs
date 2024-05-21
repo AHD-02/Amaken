@@ -32,6 +32,8 @@ namespace Amaken.Models
         [Required]
         public double Latitude { get; set; }
         
+        public string PlaceName { get; set; }
+        
         public EventGetDto (Event myEvent)
         {
             this.Description = myEvent.Description;
