@@ -274,7 +274,9 @@ namespace Amaken.Controllers
             
             if (MyUser != null)
             {
-                var MyEvents = _context.Event.ToList();
+                var MyEvents = _context.Event.Where(u => u.UserEmail!.Equals(userEmail)).ToList();
+                MyEvents = MyEvents.OrderByDescending(e => e.CreatedOn).ToList();
+
                 return Ok(MyEvents);
             }
             else
