@@ -42,6 +42,7 @@ namespace Amaken.Controllers
                     if (Event != null)
                     {
                         int lastId = GetLastId();
+                        int newId = lastId + 1;
                         myReservation.ReservationId = $"{lastId + 1}";
                         myReservation.DateOfReservation =
                             DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
@@ -49,7 +50,7 @@ namespace Amaken.Controllers
                         myReservation.Status = "OK";
                         _context.Reservation.Add(myReservation);
                         _context.SaveChanges();
-                        return Ok("Reservation is created.");
+                        return Ok($"{newId}");
                     }
                     else
                     {
