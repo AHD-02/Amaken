@@ -49,7 +49,7 @@ public class NotificationController : Controller
 
     public void PushNotifications(string desc)
     {
-        var users = _context.User.AsNoTracking().ToList();
+        var users = _context.User.ToList();
         foreach (var user in users)
         {
             Notification notification = new Notification(user.Email,desc);

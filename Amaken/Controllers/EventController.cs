@@ -36,9 +36,10 @@ namespace Amaken.Controllers
             {
                 
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser!= null)
                 {
+                    newEvent.CreatedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                     int lastId = GetLastId();
                     newEvent.EventId = $"{lastId + 1}";
                     newEvent.Status = "OK";
@@ -64,7 +65,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.ToLower() == updatedEvent.EventId!.ToLower());
+                var existingEvent = _context.Event.FirstOrDefault(u => u.EventId!.ToLower() == updatedEvent.EventId!.ToLower());
                 if (existingEvent != null)
                 {
                     existingEvent.Name = updatedEvent.Name;
@@ -77,6 +78,7 @@ namespace Amaken.Controllers
                     existingEvent.UserEmail = updatedEvent.UserEmail;
                     existingEvent.Status = updatedEvent.Status;
                     existingEvent.Images = updatedEvent.Images;
+                    existingEvent.CreatedOn = updatedEvent.CreatedOn;
                     _context.SaveChanges();
                     return Ok(existingEvent.EventId + " is updated");
 
@@ -96,7 +98,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var Event = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.ToLower().Equals(EventId.ToLower()));
+                var Event = _context.Event.FirstOrDefault(u => u.EventId!.ToLower().Equals(EventId.ToLower()));
                 if (Event != null)
                 {
                     if (Enum.IsDefined(typeof(EventStatus), newStatus))
@@ -124,7 +126,7 @@ namespace Amaken.Controllers
         public IActionResult SearchEvents()
         {
             var Events = _context.Event.ToList();
-
+            Events = Events.OrderByDescending(e => e.CreatedOn).ToList();
             return Ok(Events);
         }
         
@@ -134,7 +136,7 @@ namespace Amaken.Controllers
         public async Task<IActionResult> SearchSavedEvents()
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var user = await _context.User.AsNoTracking().FirstOrDefaultAsync(u => u.Email == userEmail);
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Email == userEmail);
 
             if (user == null)
                 throw new UnauthorizedAccessException("User was not found");
@@ -143,7 +145,6 @@ namespace Amaken.Controllers
                 return Ok(new List<Event>());
             
             var events = await _context.Event
-                .AsNoTracking()
                 .Where(e => user.SavedEvents.Contains(e.EventId))
                 .ToListAsync();
 
@@ -155,7 +156,6 @@ namespace Amaken.Controllers
         public async Task<IActionResult>GetEvent(string id)
         {
             var events = await _context.Event
-                .AsNoTracking()
                 .Where(e => e.EventId == id)
                 .FirstOrDefaultAsync();
             string TypeOfEventPlace = events.PlaceID.Split("-")[0];
@@ -169,7 +169,7 @@ namespace Amaken.Controllers
             }
             else if (TypeOfEventPlace.Equals("Public"))
             {
-            var place =  _context.Public_Place.AsNoTracking().Where(u => u.PublicPlaceId.Equals(events.PlaceID))
+            var place =  _context.Public_Place.Where(u => u.PublicPlaceId.Equals(events.PlaceID))
                 .FirstOrDefault();
             myNewEvent.Latitude = place.Latitude;
             myNewEvent.Longitude = place.Longitude;
@@ -191,10 +191,10 @@ namespace Amaken.Controllers
         public IActionResult SaveEvent(string eventId)
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var myEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.Equals(eventId));
+                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
                 if (myEvent != null)
                 {
                    
@@ -229,10 +229,10 @@ namespace Amaken.Controllers
         public IActionResult UnSaveEvent(string eventId)
         {
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                var myEvent = _context.Event.AsNoTracking().FirstOrDefault(u => u.EventId!.Equals(eventId));
+                var myEvent = _context.Event.FirstOrDefault(u => u.EventId!.Equals(eventId));
                 if (myEvent != null)
                 {
                     List<string> list = new List<string>(MyUser.SavedEvents ?? new string[0]);
@@ -264,7 +264,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/IsNameUnique")]
         public ActionResult<bool> IsNameUnique(string name)
         {
-            bool isUnique = !_context.Event.AsNoTracking().Any(p => p.Name.ToLower() == name.ToLower());
+            bool isUnique = !_context.Event.Any(p => p.Name.ToLower() == name.ToLower());
             return Ok(isUnique);
         }
     }

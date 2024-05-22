@@ -35,7 +35,7 @@ namespace Amaken.Controllers
             if (ModelState.IsValid)
             {
                 var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                var MyUser = _context.User.AsNoTracking().FirstOrDefault(u => u.Email!.Equals(userEmail));
+                var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
                 {
                     
@@ -65,7 +65,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PrivatePlace = _context.Private_Place.AsNoTracking().FirstOrDefault(u => u.PlaceId!.Equals(id));
+                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(id));
                 if (PrivatePlace != null)
                 {
                     if (Enum.IsDefined(typeof(Private_Place_Status), status))
@@ -95,7 +95,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PrivatePlace = _context.Private_Place.AsNoTracking().FirstOrDefault(u => u.PlaceId!.Equals(updatedPlace.PlaceId));
+                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(updatedPlace.PlaceId));
                 if (PrivatePlace != null)
                 {
                     updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
@@ -127,14 +127,20 @@ namespace Amaken.Controllers
         public IActionResult SearchPrivatePlaces()
         {
             var PrivatePlaces = _context.Private_Place.ToList();
-
+            PrivatePlaces = PrivatePlaces.OrderByDescending(e => e.AddedOn).ToList();
             return Ok(PrivatePlaces);
+        }
+        [HttpGet]
+        [Route("api/[controller]/GetScore")]
+        public IActionResult GetScore(string id)
+        {
+            return Ok(_context.PlacesRates.Where(u => u.PlaceId.Equals(id)).Average(u => u.Score));
         }
         [HttpGet]
         [Route("api/[controller]/GetPlaces")]
         public IActionResult GetPlaces()
         {
-            var Places = _context.Private_Place.AsNoTracking().Select(Place => new Private_Place
+            var Places = _context.Private_Place.Select(Place => new Private_Place
             {
                 Description = Place.Description,
                 Images = Place.Images,

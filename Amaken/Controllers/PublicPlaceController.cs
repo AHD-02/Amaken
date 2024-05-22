@@ -40,14 +40,14 @@ namespace Amaken.Controllers
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
                 {
-                //int lastId = GetLastId();
-                myPublic_Place.PublicPlaceId = $"Public-{100 + 1}";
+                int lastId = GetLastId();
+                myPublic_Place.PublicPlaceId = $"Public-{lastId + 1}";
                 myPublic_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPublic_Place.Status = "OK";
                 myPublic_Place.UserEmail = MyUser.Email;
                 _context.Public_Place.Add(myPublic_Place);
                 _context.SaveChanges();
-               // _NotificationController.PushNotifications($"The public place {myPublic_Place.Name} was added");
+                _NotificationController.PushNotifications($"The public place {myPublic_Place.Name} was added");
                 return Ok("Public place was added successfully");
                 }
                 else
@@ -66,7 +66,7 @@ namespace Amaken.Controllers
         {
             if (ModelState.IsValid)
             {
-                var PublicPlace = _context.Public_Place.AsNoTracking().FirstOrDefault(u => u.PublicPlaceId!.Equals(id));
+                var PublicPlace = _context.Public_Place.FirstOrDefault(u => u.PublicPlaceId!.Equals(id));
                 if (PublicPlace != null)
                 {
                     if (Enum.IsDefined(typeof(Public_Place_Status), status))
@@ -125,8 +125,15 @@ namespace Amaken.Controllers
         public IActionResult SearchPublicPlaces()
         {
             var PublicPlaces = _context.Public_Place.ToList();
+            PublicPlaces = PublicPlaces.OrderByDescending(e => e.AddedOn).ToList();
 
             return Ok(PublicPlaces);
+        }
+        [HttpGet]
+        [Route("api/[controller]/GetScore")]
+        public IActionResult GetScore(string id)
+        {
+            return Ok(_context.PlacesRates.Where(u => u.PlaceId.Equals(id)).Average(u => u.Score));
         }
         
         
@@ -135,7 +142,6 @@ namespace Amaken.Controllers
         public async Task<IActionResult>GetPlace(string id)
         {
             var place = await _context.Public_Place
-                .AsNoTracking()
                 .Where(e => e.PublicPlaceId == id)
                 .FirstOrDefaultAsync();
             if (place == null)
@@ -148,7 +154,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/Get")]
         public IActionResult GetPlaces()
         {
-            var Places = _context.Public_Place.AsNoTracking().Select(Place => new Public_Place
+            var Places = _context.Public_Place.Select(Place => new Public_Place
             {
                 CategoryID = Place.CategoryID,
                 Description = Place.Description,
@@ -167,7 +173,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/IsNameUnique")]
         public ActionResult<bool> IsNameUnique(string name)
         {
-            bool isUnique = !_context.Public_Place.AsNoTracking().Any(p => p.Name.ToLower() == name.ToLower());
+            bool isUnique = !_context.Public_Place.Any(p => p.Name.ToLower() == name.ToLower());
             return Ok(isUnique);
         }
         

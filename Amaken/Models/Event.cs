@@ -21,6 +21,8 @@ namespace Amaken.Models
         public string? EventType { get; set; }
         [Required]
         public string? Description { get; set; }
+        
+        public DateTime? CreatedOn { get; set; }
         [Required]
         public DateTimeOffset  EventStart { get; set; }
         [Required]
