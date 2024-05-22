@@ -26,6 +26,7 @@ namespace Amaken.Controllers
                     .FirstOrDefault(); 
             }
         }
+        
         [HttpPost]
         [Route("api/[controller]/CreateReservation")]
         [Authorize]
@@ -139,6 +140,86 @@ namespace Amaken.Controllers
             Reservations = Reservations.OrderByDescending(e => e.DateOfReservation).ToList();
 
             return Ok(Reservations);
+        }
+        [HttpGet]
+        [Route("api/[controller]/GetReservation")]
+        public IActionResult GetReservation(string id)
+        {
+            var reservationsWithEventAndPlaceDetails =  _context.Reservation.Where(u=>u.ReservationId.Equals(id))
+                .Join(_context.Event,
+                    reservation => reservation.EventId,
+                    @event => @event.EventId,
+                    (reservation, @event) => new
+                    {
+                        reservation.ReservationId,
+                        reservation.EventId,
+                        reservation.UserEmail,
+                        reservation.DateOfReservation,
+                        reservation.Status,
+                        EventImages = @event.Images,
+                        EventName = @event.Name,
+                        @event.EventStart,
+                        @event.EventEnd,
+                        @event.PlaceID  
+                    })
+                .Join(_context.Public_Place,
+                    combined => combined.PlaceID,
+                    place => place.PublicPlaceId,
+                    (combined, place) => new
+                    {
+                        combined.ReservationId,
+                        combined.EventId,
+                        combined.UserEmail,
+                        combined.DateOfReservation,
+                        combined.Status,
+                        combined.EventImages,
+                        combined.EventName,
+                        combined.EventStart,
+                        combined.EventEnd,
+                        PlaceName = place.Name
+                    })
+                .FirstOrDefault();
+            if (reservationsWithEventAndPlaceDetails == null)
+            {
+                reservationsWithEventAndPlaceDetails =  _context.Reservation.Where(u=>u.ReservationId.Equals(id))
+                    .Join(_context.Event,
+                        reservation => reservation.EventId,
+                        @event => @event.EventId,
+                        (reservation, @event) => new
+                        {
+                            reservation.ReservationId,
+                            reservation.EventId,
+                            reservation.UserEmail,
+                            reservation.DateOfReservation,
+                            reservation.Status,
+                            EventImages = @event.Images,
+                            EventName = @event.Name,
+                            @event.EventStart,
+                            @event.EventEnd,
+                            @event.PlaceID  
+                        })
+                    .Join(_context.Private_Place,
+                        combined => combined.PlaceID,
+                        place => place.PlaceId,
+                        (combined, place) => new
+                        {
+                            combined.ReservationId,
+                            combined.EventId,
+                            combined.UserEmail,
+                            combined.DateOfReservation,
+                            combined.Status,
+                            combined.EventImages,
+                            combined.EventName,
+                            combined.EventStart,
+                            combined.EventEnd,
+                            PlaceName = place.PlaceName
+                        })
+                    .FirstOrDefault();
+            }
+
+            return Ok(reservationsWithEventAndPlaceDetails);
+
+
         }
     }
 }
