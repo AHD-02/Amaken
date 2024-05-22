@@ -36,27 +36,34 @@ public class OpenAIController : Controller
     
     [HttpPost]
     [Route("api/[controller]/GenerateEventImages")]
-    public IActionResult GenerateEventImages([FromBody] string UserDescription)
+    public async Task<IActionResult> EnhanceDescription([FromBody] UserDescriptionRequest request)
     {
         string apiKey = "sk-proj-SUIoRc5VevdI0DbgfnRuT3BlbkFJNtzMFSwFCL2jsv7eyyeV";
         string answer = string.Empty;
         var openai = new OpenAIAPI(apiKey);
-        CompletionRequest completion = new CompletionRequest();
-        completion.Prompt = UserDescription;
-        completion.Model = OpenAI_API.Models.Model.DALLE3;
-        completion.MaxTokens = 4000;
-        var result = openai.Completions.CreateCompletionAsync(completion);
-        if (result != null)
+        
+        CompletionRequest completion = new CompletionRequest
         {
-            foreach (var item in result.Result.Completions)
-            {
-                answer = item.Text;
-            }
-            return Ok(answer);
+            Prompt = $"Enhance the following description:\n{request.UserDescription}",
+            Model = OpenAI_API.Models.Model.Davinci,
+            MaxTokens = 100,
+            Temperature = 0.7
+        };
+
+        var result = await openai.Completions.CreateCompletionAsync(completion);
+        if (result != null && result.Completions.Count > 0)
+        {
+            answer = result.Completions[0].Text.Trim();
+            return Ok(new { generatedDescription = answer });
         }
         else
         {
-            return BadRequest("Not found");
+            return BadRequest(new { error = "Not found" });
         }
+    }
+    
+    public class UserDescriptionRequest
+    { 
+        public string UserDescription { get; set; }
     }
 }
