@@ -162,7 +162,20 @@ namespace Amaken.Controllers
                 place =>place.PublicPlaceId,
                 (combined, place) => new
                 {
-                    place.Name,
+                    
+                    combined.ReservationId,
+                    combined.DateOfReservation,
+                    combined.UserEmail,
+                    combined.EventId,
+                    combined.Status,
+                    EventName = combined.Name,
+                    combined.EventStart,
+                    combined.EventEnd,
+                    combined.EventType,
+                    combined.Description,
+                    combined.Images,
+                    combined.Fees,
+                    PlaceName = place.Name,
                 })
                 .ToList();
             return Ok(Reservations);
