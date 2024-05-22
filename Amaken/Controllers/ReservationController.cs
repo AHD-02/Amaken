@@ -132,13 +132,39 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid data");
             }
         }
+        [Authorize]
         [HttpGet]
         [Route("api/[controller]/SearchReservations")]
         public IActionResult SearchReservations()
         {
-            var Reservations = _context.Reservation.ToList();
-            Reservations = Reservations.OrderByDescending(e => e.DateOfReservation).ToList();
-
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            var Reservations = _context.Reservation.Where(u=>u.UserEmail.Equals(MyUser.Email)).Join(_context.Event, reservation => reservation.EventId,
+                @event => @event.EventId,
+                (reservation, @event) => new
+                {
+                    reservation.ReservationId,
+                    reservation.DateOfReservation,
+                    reservation.UserEmail,
+                    reservation.EventId,
+                    reservation.Status,
+                    @event.Name,
+                    @event.EventStart,
+                    @event.EventEnd,
+                    @event.EventType,
+                    @event.Description,
+                    @event.Images,
+                    @event.Fees,
+                    @event.PlaceID
+                }
+            ).Join(_context.Public_Place,
+                combined=>combined.PlaceID,
+                place =>place.PublicPlaceId,
+                (combined, place) => new
+                {
+                    place.Name,
+                })
+                .ToList();
             return Ok(Reservations);
         }
         [HttpGet]
