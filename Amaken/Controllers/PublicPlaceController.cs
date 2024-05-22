@@ -11,10 +11,12 @@ namespace Amaken.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly NotificationController _NotificationController;
-        public Public_PlaceController(ApplicationDbContext context, NotificationController NotificationController)
+        private readonly GoogleMapsGeocodingService _geocodingService;
+        public Public_PlaceController(ApplicationDbContext context, NotificationController NotificationController,GoogleMapsGeocodingService geocodingService)
         {
             _context = context;
             _NotificationController = NotificationController;
+            _geocodingService = geocodingService;
         }
         
         public int GetLastId()
@@ -168,6 +170,16 @@ namespace Amaken.Controllers
                 PublicPlaceId = Place.PublicPlaceId
             });
             return Ok(Places);
+        }
+        [HttpGet("api/[controller]/GetCity")]
+        public async Task<IActionResult> GetCity(double latitude, double longitude)
+        {
+            var city = await _geocodingService.GetCityAsync(latitude, longitude);
+            if (city != null)
+            {
+                return Ok(new { City = city });
+            }
+            return NotFound("City not found");
         }
         [HttpGet]
         [Route("api/[controller]/IsNameUnique")]

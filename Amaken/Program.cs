@@ -37,6 +37,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddHttpClient(); 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<GoogleMapsGeocodingService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
@@ -73,6 +74,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 var app = builder.Build();
 app.UseCors("CorsPolicy");
 // Configure the HTTP request pipeline.
