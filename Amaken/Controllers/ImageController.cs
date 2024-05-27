@@ -60,22 +60,19 @@ namespace Amaken.Controllers
                     return BadRequest($"Invalid base64 string: {ex.Message}");
                 }
                 
-                // Compress the image
                 using (var inputStream = new MemoryStream(imageBytes))
                 using (var image = Image.Load(inputStream))
                 using (var outputStream = new MemoryStream())
                 {
-                    // Resize the image if needed (example: max width 800px)
                     image.Mutate(x => x.Resize(new ResizeOptions
                     {
                         Mode = ResizeMode.Max,
                         Size = new Size(800, 0)
                     }));
 
-                    // Save the compressed image to the output stream
                     image.Save(outputStream, new JpegEncoder
                     {
-                        Quality = 75 // Adjust the quality setting as needed (0-100)
+                        Quality = 75 
                     });
 
                     outputStream.Seek(0, SeekOrigin.Begin);
