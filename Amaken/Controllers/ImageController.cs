@@ -5,6 +5,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Amaken.Controllers
 {
@@ -54,17 +59,33 @@ namespace Amaken.Controllers
                     _logger.LogError($"Invalid base64 string: {ex.Message}");
                     return BadRequest($"Invalid base64 string: {ex.Message}");
                 }
-
-                using (var stream = new MemoryStream(imageBytes))
+                
+                // Compress the image
+                using (var inputStream = new MemoryStream(imageBytes))
+                using (var image = Image.Load(inputStream))
+                using (var outputStream = new MemoryStream())
                 {
+                    // Resize the image if needed (example: max width 800px)
+                    image.Mutate(x => x.Resize(new ResizeOptions
+                    {
+                        Mode = ResizeMode.Max,
+                        Size = new Size(800, 0)
+                    }));
+
+                    // Save the compressed image to the output stream
+                    image.Save(outputStream, new JpegEncoder
+                    {
+                        Quality = 75 // Adjust the quality setting as needed (0-100)
+                    });
+
+                    outputStream.Seek(0, SeekOrigin.Begin);
 
                     var fileName = Guid.NewGuid().ToString() + request.fileExtension;
-                    var UploadedFileName = await _storageService.UploadImageAsync(stream, "image/jpeg", fileName);
+                    var uploadedFileName = await _storageService.UploadImageAsync(outputStream, "image/jpeg", fileName);
 
-                    _logger.LogInformation($"Uploaded file: {UploadedFileName}");
+                    _logger.LogInformation($"Uploaded file: {uploadedFileName}");
 
-                    var imageUrl = $"{_endpointUrl}/{UploadedFileName}";
-
+                    var imageUrl = $"{_endpointUrl}/{uploadedFileName}";
                     listOfImagesUrls.Add(imageUrl);
                 }
             }
