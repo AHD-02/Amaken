@@ -27,9 +27,14 @@ public class OpenAIController : Controller
         _bucketName = "amaken-images";
         _endpointUrl = "https://amaken-images.fra1.digitaloceanspaces.com";
     }
+
+    public class EnhancedDescription
+    {
+        public string prompt { get; set; }
+    }
     [HttpPost]
     [Route("api/[controller]/EnhanceDescription")]
-    public async Task<IActionResult> EnhanceDescription([FromBody] string UserDescription)
+    public async Task<IActionResult> EnhanceDescription([FromBody] EnhancedDescription request)
     {
         {
             string apiKey = "sk-proj-SUIoRc5VevdI0DbgfnRuT3BlbkFJNtzMFSwFCL2jsv7eyyeV";
@@ -37,9 +42,9 @@ public class OpenAIController : Controller
             var openai = new OpenAIAPI(apiKey);
             CompletionRequest completion = new CompletionRequest
             {
-                Prompt = $"Original Description:\n{UserDescription}\n\nRegenerated Description:",
+                Prompt = $"Original Description:\n{request.prompt}\n\nRegenerated Description (short and concise):",
                 Model = OpenAI_API.Models.Model.ChatGPTTurboInstruct,
-                MaxTokens = 4000
+                MaxTokens = 150
             };
 
             var result = await openai.Completions.CreateCompletionAsync(completion);
