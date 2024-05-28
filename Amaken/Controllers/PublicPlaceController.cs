@@ -132,7 +132,7 @@ namespace Amaken.Controllers
             return Ok(PublicPlaces);
         }
         [HttpGet]
-        [Route("api/[controller]/GetScore")]
+        [Route("api/[controller]/{id}/GetScore")]
         public IActionResult GetScore(string id)
         {
             return Ok(_context.PlacesRates.Where(u => u.PlaceId.Equals(id)).Average(u => u.Score));
