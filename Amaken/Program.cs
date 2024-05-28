@@ -42,6 +42,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 builder.Services.Configure<DigitalOceanSpacesSettings>(builder.Configuration.GetSection("DigitalOceanSpaces"));
+builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
 builder.Services.AddTransient<DigitalOceanStorageService>();
 builder.Services.AddSwaggerGen(options =>
 {

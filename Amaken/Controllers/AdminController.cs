@@ -3,14 +3,22 @@ using Amaken.Types;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+
 namespace Amaken.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration; 
-        public AdminController(ApplicationDbContext context, IConfiguration configuration)
+        private readonly SendGridSettings _sendGridSettings;
+        public AdminController(IOptions<SendGridSettings> sendGridSettings,ApplicationDbContext context, IConfiguration configuration)
         {
+            _sendGridSettings = sendGridSettings.Value;
             _context = context;
             _configuration = configuration;
         }
@@ -158,6 +166,170 @@ namespace Amaken.Controllers
             
             return Ok(admin);
         }
+        [HttpPost]
+        [Route("api/[controller]/SendRejectionOrApprovalEmailToOwner")]
+        public async Task<IActionResult> SendRejectionOrApprovalEmailToOwner([FromBody] bool isApproved, string placeID)
+{
+    var place = _context.Private_Place.Where(u => u.PlaceId.ToLower().Equals(placeID.ToLower())).FirstOrDefault();
+    var user = _context.User.Where(u => u.Email.ToLower().Equals(place.UserEmail.ToLower())).FirstOrDefault();
+    if (user != null && place != null)
+    {
+        var client = new SendGridClient(_sendGridSettings.ApiKey);
+        Console.WriteLine($"API: {_sendGridSettings.ApiKey}");
+        var from = new EmailAddress("amakenjo.team@gmail.com", "Amaken");
+        var subject = string.Empty;
+        var plainTextContent = string.Empty;
+        var htmlContent = string.Empty;
+
+        if (isApproved)
+        {
+            subject = "Your Registration Request Has Been Approved!";
+            plainTextContent = $@"
+Dear {user.FirstName},
+
+We are delighted to inform you that your request to register your private place has been approved! Your place is now officially listed with us.
+
+Details:
+- Registered Place: {place.PlaceName}
+- Registration Date: {place.AddedOn}
+
+Thank you for choosing our platform. We are excited to have you on board and look forward to providing you with the best service possible.
+
+Best regards,
+The Amaken Team";
+
+            htmlContent = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+        }}
+        .container {{
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }}
+        .header {{
+            text-align: center;
+            padding: 10px 0;
+        }}
+        .content {{
+            margin: 20px 0;
+        }}
+        .footer {{
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            color: #888;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Congratulations!</h1>
+        </div>
+        <div class='content'>
+            <p>Dear <strong>{user.FirstName}</strong>,</p>
+            <p>We are delighted to inform you that your request to register your private place has been <strong>approved</strong>! Your place is now officially listed with us.</p>
+            <p>Details:</p>
+            <ul>
+                <li>Registered Place: <strong>{place.PlaceName}</strong></li>
+                <li>Registration Date: <strong>{place.AddedOn}</strong></li>
+            </ul>
+            <p>Thank you for choosing our platform. We are excited to have you on board and look forward to providing you with the best service possible.</p>
+        </div>
+        <div class='footer'>
+            <p>Best regards,</p>
+            <p>The Amaken Team</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+        else
+        {
+            subject = "Your Registration Request Has Been Declined";
+            plainTextContent = $@"
+Dear {user.FirstName},
+
+We regret to inform you that your request to register your private place has been declined after careful consideration.
+
+If you have any questions or require further information, please do not hesitate to contact us.
+
+Thank you for understanding.
+
+Best regards,
+The Amaken Team";
+
+            htmlContent = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+        }}
+        .container {{
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }}
+        .header {{
+            text-align: center;
+            padding: 10px 0;
+        }}
+        .content {{
+            margin: 20px 0;
+        }}
+        .footer {{
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            color: #888;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>We're Sorry</h1>
+        </div>
+        <div class='content'>
+            <p>Dear <strong>{user.FirstName}</strong>,</p>
+            <p>We regret to inform you that your request to register your private place has been <strong>declined</strong> after careful consideration.</p>
+            <p>If you have any questions or require further information, please do not hesitate to contact us.</p>
+            <p>Thank you for understanding.</p>
+        </div>
+        <div class='footer'>
+            <p>Best regards,</p>
+            <p>The Amaken Team</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        var to = new EmailAddress(user.Email, $"{user.FirstName} {user.LastName}");
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+        var response = await client.SendEmailAsync(msg);
+        var responseBody = await response.Body.ReadAsStringAsync();
+        return Ok(new { statusCode = response.StatusCode, body = responseBody });
+    }
+    else
+    {
+        return NotFound("User or place wasn't found");
+    }
+}
+
         public static string HashPassword (string password)
         {
             using (SHA256 sha256 = SHA256.Create())

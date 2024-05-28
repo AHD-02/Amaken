@@ -56,20 +56,35 @@ public class OpenAIController : Controller
     }
     
     [HttpPost]
-    [Route("api/[controller]/GenerateEventImages")]
+    [Route("api/[controller]/GenerateImage")]
     
-    public async Task<IActionResult> GenerateAndUploadImage([FromBody] string prompt)
+    public async Task<IActionResult> GenerateImage([FromBody] string prompt)
     {
         try
         {
             var imageUrl = await GenerateImageAsync(prompt);
+
+            return Ok(imageUrl);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while generating the image.");
+            return StatusCode(500, ex.Message);
+        }
+    }
+    [HttpPost]
+    [Route("api/[controller]/UploadImage")]
+    public async Task<IActionResult> UploadImage([FromBody] string imageUrl)
+    {
+        try
+        {
             var lastImageUrl = await DownloadAndUploadImage(imageUrl);
 
             return Ok(lastImageUrl);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while generating and uploading the image.");
+            _logger.LogError(ex, "An error occurred while uploading the image.");
             return StatusCode(500, ex.Message);
         }
     }
@@ -92,7 +107,6 @@ public class OpenAIController : Controller
             var responseString = await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseString);
             var imageUrl = responseJson["data"][0]["url"].ToString();
-            _logger.LogInformation($"Image URL: {imageUrl}");
             return imageUrl;
         }
         else
