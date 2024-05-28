@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Amaken.Controllers;
 
+public class RatePlaceModel
+{
+    public int Score { get; set; }
+}
+
 public class PlacesRatesController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -14,10 +19,10 @@ public class PlacesRatesController : Controller
     {
         _context = context;
     }
-
+    
     [HttpPost]
-    [Route("api/[controller]/Rate")]
-    public IActionResult CreatePublicPlaceCategory(int score, string PlaceID)
+    [Route("api/[controller]/{placeID}/Rate")]
+    public IActionResult CreatePublicPlaceCategory(string placeID, [FromBody] RatePlaceModel req)
     {
         if (ModelState.IsValid)
         {
@@ -25,15 +30,15 @@ public class PlacesRatesController : Controller
             var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
             if (MyUser != null)
             {
-                if(PlaceID.Split("-")[0].Equals("Public"))
+                if(placeID.Split("-")[0].Equals("Public"))
                 {
-                    var MyPlace = _context.Public_Place.Where(u => u.PublicPlaceId.Equals(PlaceID)).FirstOrDefault();
+                    var MyPlace = _context.Public_Place.Where(u => u.PublicPlaceId.Equals(placeID)).FirstOrDefault();
                     if (MyPlace != null)
                     {
                         PlacesRates rate = new PlacesRates();
                         rate.UserEmail = MyUser.Email;
                         rate.PlaceId = MyPlace.PublicPlaceId;
-                        rate.Score = score;
+                        rate.Score = req.Score;
                         _context.PlacesRates.Add(rate);
                         _context.SaveChanges();
                         return Ok("Rate has been saved successfully");
@@ -43,15 +48,15 @@ public class PlacesRatesController : Controller
                         return NotFound("Place wasn't found");
                     }
                 }
-                else if (PlaceID.Split("-")[0].Equals("Private"))
+                else if (placeID.Split("-")[0].Equals("Private"))
                 {
-                    var MyPlace = _context.Private_Place.Where(u => u.PlaceId.Equals(PlaceID)).FirstOrDefault();
+                    var MyPlace = _context.Private_Place.Where(u => u.PlaceId.Equals(placeID)).FirstOrDefault();
                     if (MyPlace != null)
                     {
                         PlacesRates rate = new PlacesRates();
                         rate.UserEmail = MyUser.Email;
                         rate.PlaceId = MyPlace.PlaceId;
-                        rate.Score = score;
+                        rate.Score = req.Score;
                         _context.PlacesRates.Add(rate);
                         _context.SaveChanges();
                         return Ok("Rate has been saved successfully");
