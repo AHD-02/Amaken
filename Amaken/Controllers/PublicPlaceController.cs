@@ -240,25 +240,6 @@ namespace Amaken.Controllers
                 return Unauthorized("User isn't authorized");
             }
         }
-        [HttpGet]
-        [Route("api/[controller]/Get")]
-        public IActionResult GetPlaces()
-        {
-            var Places = _context.Public_Place.Select(Place => new Public_Place
-            {
-                CategoryID = Place.CategoryID,
-                Description = Place.Description,
-                Images = Place.Images,
-                Latitude = Place.Latitude,
-                Longitude = Place.Longitude,
-                Name = Place.Name,
-                Status = Place.Status,
-                AddedOn = Place.AddedOn,
-                UserEmail = Place.UserEmail,
-                PublicPlaceId = Place.PublicPlaceId
-            });
-            return Ok(Places);
-        }
         [HttpGet("api/[controller]/GetCity")]
         public async Task<IActionResult> GetCity(double latitude, double longitude)
         {

@@ -32,6 +32,9 @@ namespace Amaken.Models
         public string[]? SavedPublicPlaces { get; set; }
         [Required]
         public string? Country { get; set; }
+        
+        public string? Discriminator { get; set; }
+        
         [Required]
         public string? City { get; set; }
         [Required]

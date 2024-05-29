@@ -36,6 +36,7 @@ namespace Amaken.Controllers
                     newUser.Status = "OK";
                     newUser.Password = HashPassword(newUser.Password!);
                     User myNewUser = new User(newUser);
+                    myNewUser.Discriminator = "User";
                     _context.User.Add(myNewUser);
                     _context.SaveChanges();
                     var jwtSecret = _configuration["Jwt:Secret"];
@@ -76,6 +77,7 @@ namespace Amaken.Controllers
                     User.Intrests = newUser.Intrests;
                     User.SavedEvents = newUser.SavedEvents;
                     User.SavedPublicPlaces = newUser.SavedPublicPlaces;
+                    User.Discriminator = newUser.Discriminator;
                     _context.SaveChanges();
                     return Ok("User has been updated");
                 }

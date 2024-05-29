@@ -34,7 +34,6 @@ namespace Amaken.Models
         [Required]
         public string? Status { get; set; } = "OK";
         
-        
 
 
     }
