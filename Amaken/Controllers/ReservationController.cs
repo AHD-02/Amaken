@@ -181,12 +181,17 @@ namespace Amaken.Controllers
             return Ok(Reservations);
         }
 
-        [HttpGet]
-        [Route("api/[controller]/CheckReservation")]
-        public IActionResult CheckReservation([FromBody] string newEventID, string newReservationID)
+        public class CheckMyReservation
         {
-            var myEvent = _context.Event.Where(u => u.EventId.ToLower().Equals(newEventID.ToLower())).FirstOrDefault();
-            var myReservation = _context.Reservation.Where(u => u.ReservationId.ToLower().Equals(newReservationID.ToLower())).FirstOrDefault();
+            public string EventID { get; set; }
+            public string ReservationID { get; set; }
+        }
+        [HttpPost]
+        [Route("api/[controller]/CheckReservation")]
+        public IActionResult CheckReservation([FromBody] CheckMyReservation checkReservation)
+        {
+            var myEvent = _context.Event.Where(u => u.EventId.ToLower().Equals(checkReservation.EventID.ToLower())).FirstOrDefault();
+            var myReservation = _context.Reservation.Where(u => u.ReservationId.ToLower().Equals(checkReservation.ReservationID.ToLower())).FirstOrDefault();
             if (myEvent == null || myReservation == null)
             {
                 return BadRequest(false);
