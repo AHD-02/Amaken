@@ -109,6 +109,9 @@ namespace Amaken.Controllers
                     PrivatePlace.Status=updatedPlace.Status;
                     PrivatePlace.PlaceName=updatedPlace.PlaceName;
                     PrivatePlace.Images=updatedPlace.Images;
+                    PrivatePlace.ImageOfOwnershipProof = updatedPlace.ImageOfOwnershipProof;
+                    PrivatePlace.ImageOfOwnerID = updatedPlace.ImageOfOwnerID;
+                    PrivatePlace.CategoryID = updatedPlace.CategoryID;
                     _context.SaveChanges();
                     return Ok("Private place was updated successfully");
                 }
@@ -126,8 +129,14 @@ namespace Amaken.Controllers
         [Route("api/[controller]/SearchPrivatePlaces")]
         public IActionResult SearchPrivatePlaces()
         {
-            var PrivatePlaces = _context.Private_Place.ToList();
-            PrivatePlaces = PrivatePlaces.OrderByDescending(e => e.AddedOn).ToList();
+            var PrivatePlaces = _context.Private_Place.Select(place => new
+                {
+                    Place = place,
+                    NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())),
+                    AverageScore = _context.PlacesRates.Where(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())).Average(r => (double?)r.Score) ?? 0
+                })
+                .OrderByDescending(p => p.Place.AddedOn)
+                .ToList();
             return Ok(PrivatePlaces);
         }
         [HttpGet]
@@ -137,25 +146,29 @@ namespace Amaken.Controllers
             return Ok(_context.PlacesRates.Where(u => u.PlaceId.Equals(id)).Average(u => u.Score));
         }
         [HttpGet]
-        [Route("api/[controller]/GetPlaces")]
-        public IActionResult GetPlaces()
+        [Route("api/[controller]/{id}")]
+        public async Task<IActionResult> GetPlaces(string id)
         {
-            var Places = _context.Private_Place.Select(Place => new Private_Place
+            var placeWithRates = await _context.Private_Place
+                .Where(e => e.PlaceId.ToLower() == id.ToLower())
+                .Select(place => new
+                {
+                    Place = place,
+                    NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower() == place.PlaceId.ToLower()),
+                    AverageScore = _context.PlacesRates
+                        .Where(r => r.PlaceId.ToLower() == place.PlaceId.ToLower())
+                        .Select(r => (double?)r.Score)
+                        .Average() ?? 0
+                })
+                .FirstOrDefaultAsync();
+
+            if (placeWithRates == null)
             {
-                Description = Place.Description,
-                Images = Place.Images,
-                Latitude = Place.Latitude,
-                Longitude = Place.Longitude,
-                PlaceName = Place.PlaceName,
-                Status = Place.Status,
-                AddedOn = Place.AddedOn,
-                UserEmail = Place.UserEmail,
-                PlaceId = Place.PlaceId,
-                AvailableFrom = Place.AvailableFrom,
-                AvailableTo = Place.AvailableTo,
-                RegisterNumber = Place.RegisterNumber
-            });
-            return Ok(Places);
+                return NotFound();
+            }
+
+            return Ok(placeWithRates);
         }
+
     }
 }

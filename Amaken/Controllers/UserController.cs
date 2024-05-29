@@ -74,6 +74,8 @@ namespace Amaken.Controllers
                     User.Images = newUser.Images;
                     User.Status = newUser.Status;
                     User.Intrests = newUser.Intrests;
+                    User.SavedEvents = newUser.SavedEvents;
+                    User.SavedPublicPlaces = newUser.SavedPublicPlaces;
                     _context.SaveChanges();
                     return Ok("User has been updated");
                 }

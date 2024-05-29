@@ -24,6 +24,13 @@ namespace Amaken.Models
         [Required]
         public String Status { get; set; } = "Unapproved";
         public DateTime AddedOn { get; set; }
+        [Required]
+        public string ImageOfOwnerID { get; set; }
+        [Required]
+        public string ImageOfOwnershipProof{ get; set; }
+        
+        [Required]
+        public string CategoryID{ get; set; }
         
         [Required]
         public double Longitude { get; set; }

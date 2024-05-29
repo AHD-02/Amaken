@@ -29,6 +29,7 @@ namespace Amaken.Models
         public string? City { get; set; }
         [Required]
         public string[]? Intrests { get; set; }
+        public string[]? SavedPublicPlaces { get; set; }
 
         [Required]
         public string? Status { get; set; } = "OK";

@@ -10,7 +10,7 @@ namespace Amaken.Controllers
     public class Public_PlaceController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly NotificationController _NotificationController;
+        private readonly NotificationController _NotificationController; 
         private readonly GoogleMapsGeocodingService _geocodingService;
         public Public_PlaceController(ApplicationDbContext context, NotificationController NotificationController,GoogleMapsGeocodingService geocodingService)
         {
@@ -126,11 +126,19 @@ namespace Amaken.Controllers
         [Route("api/[controller]/Search")]
         public IActionResult SearchPublicPlaces()
         {
-            var PublicPlaces = _context.Public_Place.ToList();
-            PublicPlaces = PublicPlaces.OrderByDescending(e => e.AddedOn).ToList();
+            var publicPlacesWithRates = _context.Public_Place
+                .Select(place => new
+                {
+                    Place = place,
+                    NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PublicPlaceId.ToLower())),
+                    AverageScore = _context.PlacesRates.Where(r => r.PlaceId.ToLower().Equals(place.PublicPlaceId.ToLower())).Average(r => (double?)r.Score) ?? 0
+                })
+                .OrderByDescending(p => p.Place.AddedOn)
+                .ToList();
 
-            return Ok(PublicPlaces);
+            return Ok(publicPlacesWithRates);
         }
+
         [HttpGet]
         [Route("api/[controller]/{id}/GetScore")]
         public IActionResult GetScore(string id)
@@ -145,13 +153,93 @@ namespace Amaken.Controllers
         {
             var place = await _context.Public_Place
                 .Where(e => e.PublicPlaceId == id)
-                .FirstOrDefaultAsync();
+                .Select(
+                    place => new
+                    {
+                        Place = place,
+                        NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PublicPlaceId.ToLower())),
+                        AverageScore = _context.PlacesRates.Where(r => r.PlaceId.ToLower().Equals(place.PublicPlaceId.ToLower())).Average(r => (double?)r.Score) ?? 0
+
+                    }
+                    ).FirstOrDefaultAsync();
             if (place == null)
                 throw new Exception($"Event with id {id} was not found");
             
             return Ok(place);
         }
-        
+           [HttpPost]
+        [Route("api/[controller]/{placeId}/SavePlace")]
+        [Authorize]
+        public IActionResult SavePublicPlace(string placeId)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var myPlace = _context.Public_Place.FirstOrDefault(u => u.PublicPlaceId!.Equals(placeId));
+                if (myPlace != null)
+                {
+                   
+                    List<string> list = new List<string>(MyUser.SavedPublicPlaces ?? new string[0]);
+                    if (!list.Contains(placeId))
+                    {
+                        list.Add(placeId);
+                        MyUser.SavedPublicPlaces = list.ToArray();
+                        _context.SaveChanges();
+                        return Ok($"Place {placeId} is saved");
+                    }
+
+                    else
+                    {
+                        return BadRequest("Place is already saved");
+                    } 
+                }
+                else
+                {
+                    return NotFound("Place wasn't found");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
+        [HttpPost]
+        [Route("api/[controller]/{placeId}/UnSavePlace")]
+        [Authorize]
+        public IActionResult UnSavePlace(string placeId)
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser != null)
+            {
+                var myPlace = _context.Public_Place.FirstOrDefault(u => u.PublicPlaceId!.Equals(placeId));
+                if (myPlace != null)
+                {
+                    List<string> list = new List<string>(MyUser.SavedPublicPlaces ?? new string[0]);
+                    if (list.Contains(placeId))
+                    {
+                        list.Remove(placeId);
+                        MyUser.SavedPublicPlaces = list.ToArray();
+                        _context.SaveChanges();
+                        return Ok($"Place {placeId} is removed");
+                    }
+
+                    else
+                    {
+                        return BadRequest("Place isn't saved");
+                    } 
+                }
+                else
+                {
+                    return NotFound("Place wasn't found");
+                }
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
         [HttpGet]
         [Route("api/[controller]/Get")]
         public IActionResult GetPlaces()

@@ -28,14 +28,15 @@ namespace Amaken.Models
         [Required]
         public string? Phone { get; set; }
         public string[]? Images { get; set; } 
-        public string[]? SavedEvents { get; set; } 
+        public string[]? SavedEvents { get; set; }
+        public string[]? SavedPublicPlaces { get; set; }
         [Required]
         public string? Country { get; set; }
         [Required]
         public string? City { get; set; }
         [Required]
         public string[]? Intrests { get; set; }
-
+        
         [Required]
         public string? Status { get; set; } = "OK";
 
@@ -53,6 +54,7 @@ namespace Amaken.Models
             this.SavedEvents = createUserDto.SavedEvents;
             this.DateOfBirth = createUserDto.DateOfBirth;
             this.Intrests = createUserDto.Intrests;
+            this.SavedPublicPlaces = createUserDto.SavedPublicPlaces;
         }
 
         public User()
