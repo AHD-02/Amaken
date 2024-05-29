@@ -180,6 +180,29 @@ namespace Amaken.Controllers
                 .ToList();
             return Ok(Reservations);
         }
+
+        [HttpGet]
+        [Route("api/[controller]/CheckReservation")]
+        public IActionResult CheckReservation([FromBody] string newEventID, string newReservationID)
+        {
+            var myEvent = _context.Event.Where(u => u.EventId.ToLower().Equals(newEventID.ToLower())).FirstOrDefault();
+            var myReservation = _context.Reservation.Where(u => u.ReservationId.ToLower().Equals(newReservationID.ToLower())).FirstOrDefault();
+            if (myEvent == null || myReservation == null)
+            {
+                return BadRequest(false);
+            }
+            else
+            {
+                if (myReservation.EventId.ToLower().Equals(myEvent.EventId.ToLower()))
+                {
+                    return Ok(true);
+                }
+                else
+                {
+                    return BadRequest(false);
+                }
+            }
+        }
         [HttpGet]
         [Route("api/[controller]/GetReservation")]
         public IActionResult GetReservation(string id)
