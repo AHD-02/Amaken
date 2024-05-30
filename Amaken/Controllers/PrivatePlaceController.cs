@@ -140,6 +140,33 @@ namespace Amaken.Controllers
             return Ok(PrivatePlaces);
         }
         [HttpGet]
+        [Route("api/[controller]/MyPrivatePlaces")]
+        [Authorize]
+        public IActionResult MyPrivatePlaces()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
+            if (MyUser!=null)
+            {
+                var PrivatePlaces = _context.Private_Place.Where(u=>u.UserEmail.ToLower().Equals(MyUser.Email.ToLower())).Select(place => new
+                    {
+                        Place = place,
+                        NumberOfRates =
+                            _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())),
+                        AverageScore = _context.PlacesRates
+                            .Where(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower()))
+                            .Average(r => (double?)r.Score) ?? 0
+                    })
+                    .OrderByDescending(p => p.Place.AddedOn)
+                    .ToList();
+                return Ok(PrivatePlaces);
+            }
+            else
+            {
+                return Unauthorized("User isn't authorized");
+            }
+        }
+        [HttpGet]
         [Route("api/[controller]/GetScore")]
         public IActionResult GetScore(string id)
         {
@@ -169,6 +196,12 @@ namespace Amaken.Controllers
 
             return Ok(placeWithRates);
         }
-
+        [HttpGet]
+        [Route("api/[controller]/IsNameUnique")]
+        public ActionResult<bool> IsNameUnique(string name)
+        {
+            var isUnique = !_context.Private_Place.Any(p => p.PlaceName.ToLower() == name.ToLower());
+            return Ok(isUnique);
+        }
     }
 }
