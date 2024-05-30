@@ -129,7 +129,7 @@ namespace Amaken.Controllers
         }
 
         [HttpPut]
-        [Route("api/[controller]/ApprovePrivatePlace")]
+        [Route("api/[controller]/ApprovePrivatePlace/{newPlaceId}")]
         public async Task<IActionResult> ApprovePrivatePlace(string newPlaceId)
         {
             if (ModelState.IsValid)
