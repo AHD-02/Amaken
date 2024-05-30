@@ -138,6 +138,26 @@ namespace Amaken.Controllers
 
             return Ok(publicPlacesWithRates);
         }
+        [HttpGet]
+        [Route("api/[controller]/SearchSavedPlaces")]
+        [Authorize]
+        public async Task<IActionResult> SearchSavedPlaces()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Email == userEmail);
+            
+            if (user == null)
+                throw new UnauthorizedAccessException("User was not found");
+            
+            if (user.SavedPublicPlaces == null)
+                return Ok(new List<Public_Place>());
+            
+            var publicPlaces = await _context.Public_Place
+                .Where(e => user.SavedPublicPlaces.Contains(e.PublicPlaceId))
+                .ToListAsync();
+
+            return Ok(publicPlaces);
+        }
 
         [HttpGet]
         [Route("api/[controller]/{id}/GetScore")]
