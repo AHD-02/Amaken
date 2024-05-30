@@ -60,14 +60,18 @@ public class OpenAIController : Controller
         }
     }
     
+    public class EnhancedImage
+    {
+        public string prompt { get; set; }
+    }
     [HttpPost]
     [Route("api/[controller]/GenerateImage")]
     
-    public async Task<IActionResult> GenerateImage([FromBody] string prompt)
+    public async Task<IActionResult> GenerateImage([FromBody] EnhancedImage request)
     {
         try
         {
-            var imageUrl = await GenerateImageAsync(prompt);
+            var imageUrl = await GenerateImageAsync(request.prompt);
             var lastImageUrl = await UploadImage(imageUrl);
             return Ok(lastImageUrl);
         }
