@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace Amaken.Controllers
 {
@@ -17,16 +20,111 @@ namespace Amaken.Controllers
     {
         private readonly ApplicationDbContext _context;  
         private readonly IConfiguration _configuration; 
+        private readonly SendGridSettings _sendGridSettings;
         
-        public UserController(ApplicationDbContext context, IConfiguration configuration) 
+        public UserController(IOptions<SendGridSettings> sendGridSettings,ApplicationDbContext context, IConfiguration configuration) 
         {
             _context = context;
             _configuration = configuration;
+            _sendGridSettings = sendGridSettings.Value;
         }
-        
+                [HttpPost]
+        [Route("api/[controller]/SendWelcomeEmail")]
+public async Task<IActionResult> SendWelcomeEmail([FromBody] string userEmail)
+{
+    var user = _context.User.Where(u => u.Email.ToLower().Equals(userEmail.ToLower())).FirstOrDefault();
+    if (user != null)
+    {
+        var client = new SendGridClient(_sendGridSettings.ApiKey);
+        var from = new EmailAddress("amakenjo.team@gmail.com", "Amaken");
+        var subject = "Welcome to Amaken!";
+        var plainTextContent = $@"
+Dear {user.FirstName},
+
+Welcome to Amaken!
+
+We are thrilled to have you join our community. At Amaken, we are dedicated to providing you with the best experience possible. Whether you are here to explore new places or share your own, we are excited to have you with us.
+
+If you have any questions, feel free to reach out to us at any time. We are here to help!
+
+Best regards,
+The Amaken Team";
+
+        var htmlContent = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }}
+        .container {{
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }}
+        .header {{
+            text-align: center;
+            padding: 20px 0;
+        }}
+        .content {{
+            margin: 20px 0;
+        }}
+        .footer {{
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: #888888;
+        }}
+        img {{
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px auto;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <img src='https://amaken-images.fra1.digitaloceanspaces.com/Amaken%20Logo.png' alt='Amaken Logo' />
+            <h1>Welcome to Amaken!</h1>
+        </div>
+        <div class='content'>
+            <p>Dear <strong>{user.FirstName}</strong>,</p>
+            <p>Welcome to <strong>Amaken</strong>! We are thrilled to have you join our community.</p>
+            <p>At Amaken, we are dedicated to providing you with the best experience possible. Whether you are here to explore new places or share your own, we are excited to have you with us.</p>
+            <p>If you have any questions, feel free to reach out to us at any time. We are here to help!</p>
+        </div>
+        <div class='footer'>
+            <p>Best regards,</p>
+            <p>The Amaken Team</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        var to = new EmailAddress(user.Email, $"{user.FirstName} {user.LastName}");
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+        var response = await client.SendEmailAsync(msg);
+        var responseBody = await response.Body.ReadAsStringAsync();
+        return Ok(new { statusCode = response.StatusCode, body = responseBody });
+    }
+    else
+    {
+        return NotFound("User not found");
+    }
+}
+
         [HttpPost]
         [Route("api/[controller]/Create")]
-        public IActionResult CreateUser([FromBody] UserCreateDto newUser)
+        public async Task<IActionResult> CreateUser([FromBody] UserCreateDto newUser)
         {
             if (ModelState.IsValid)
             {
@@ -41,6 +139,7 @@ namespace Amaken.Controllers
                     _context.SaveChanges();
                     var jwtSecret = _configuration["Jwt:Secret"];
                     var token = GenerateJwtToken(newUser.Email!, jwtSecret);
+                    await SendWelcomeEmail(myNewUser.Email);
                     return Ok(new { Token = token });
                 }
                 else

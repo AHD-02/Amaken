@@ -164,7 +164,7 @@ namespace Amaken.Controllers
                 {
                     PrivatePlace.Status = "Rejected";
                     _context.SaveChanges();
-                    SendRejectionEmailToOwner(rejectedPlace);
+                    await SendRejectionEmailToOwner(rejectedPlace);
                     return Ok("Private place is rejected");
                     
                 }
@@ -205,20 +205,16 @@ namespace Amaken.Controllers
         [HttpPost]
         [Route("api/[controller]/SendApprovalEmailToOwner")]
         public async Task<IActionResult> SendApprovalEmailToOwner([FromBody] string placeID)
-        {
-            var place = _context.Private_Place.Where(u => u.PlaceId.ToLower().Equals(placeID.ToLower()))
-                .FirstOrDefault();
-            var user = _context.User.Where(u => u.Email.ToLower().Equals(place.UserEmail.ToLower())).FirstOrDefault();
-            if (user != null && place != null)
-            {
-                var client = new SendGridClient(_sendGridSettings.ApiKey);
-                Console.WriteLine($"API: {_sendGridSettings.ApiKey}");
-                var from = new EmailAddress("amakenjo.team@gmail.com", "Amaken");
-                var subject = string.Empty;
-                var plainTextContent = string.Empty;
-                var htmlContent = string.Empty;
-                subject = "Your Registration Request Has Been Approved!";
-                plainTextContent = $@"
+{
+    var place = _context.Private_Place.Where(u => u.PlaceId.ToLower().Equals(placeID.ToLower()))
+        .FirstOrDefault();
+    var user = _context.User.Where(u => u.Email.ToLower().Equals(place.UserEmail.ToLower())).FirstOrDefault();
+    if (user != null && place != null)
+    {
+        var client = new SendGridClient(_sendGridSettings.ApiKey);
+        var from = new EmailAddress("amakenjo.team@gmail.com", "Amaken");
+        var subject = "Your Registration Request Has Been Approved!";
+        var plainTextContent = $@"
 Dear {user.FirstName},
 
 We are delighted to inform you that your request to register your private place has been approved! Your place is now officially listed with us.
@@ -232,40 +228,50 @@ Thank you for choosing our platform. We are excited to have you on board and loo
 Best regards,
 The Amaken Team";
 
-                htmlContent = $@"
+        var htmlContent = $@"
 <!DOCTYPE html>
 <html>
 <head>
     <style>
         body {{
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }}
         .container {{
             width: 80%;
             margin: auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            background-color: #ffffff;
             border-radius: 10px;
-            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }}
         .header {{
             text-align: center;
-            padding: 10px 0;
+            padding: 20px 0;
         }}
         .content {{
             margin: 20px 0;
         }}
         .footer {{
             text-align: center;
-            padding: 10px 0;
+            padding: 20px 0;
             font-size: 12px;
-            color: #888;
+            color: #888888;
+        }}
+        img {{
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px auto;
         }}
     </style>
 </head>
 <body>
     <div class='container'>
         <div class='header'>
+            <img src='https://amaken-images.fra1.digitaloceanspaces.com/Amaken%20Logo.png' alt='Amaken Logo' />
             <h1>Congratulations!</h1>
         </div>
         <div class='content'>
@@ -286,18 +292,18 @@ The Amaken Team";
 </body>
 </html>";
 
+        var to = new EmailAddress(user.Email, $"{user.FirstName} {user.LastName}");
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+        var response = await client.SendEmailAsync(msg);
+        var responseBody = await response.Body.ReadAsStringAsync();
+        return Ok(new { statusCode = response.StatusCode, body = responseBody });
+    }
+    else
+    {
+        return NotFound("User or place wasn't found");
+    }
+}
 
-                var to = new EmailAddress(user.Email, $"{user.FirstName} {user.LastName}");
-                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-                var response = await client.SendEmailAsync(msg);
-                var responseBody = await response.Body.ReadAsStringAsync();
-                return Ok(new { statusCode = response.StatusCode, body = responseBody });
-            }
-            else
-            {
-                return NotFound("User or place wasn't found");
-            }
-        }
 
         public class RejectedPrivatePlace
         {
@@ -344,7 +350,7 @@ The Amaken Team";
         }
         [HttpPost]
         [Route("api/[controller]/SendRejectionEmailToOwner")]
-        public async Task<IActionResult> SendRejectionEmailToOwner([FromBody] RejectedPrivatePlace RejectedPlace)
+   public async Task<IActionResult> SendRejectionEmailToOwner([FromBody] RejectedPrivatePlace RejectedPlace)
 {
     var place = _context.Private_Place.Where(u => u.PlaceId.ToLower().Equals(RejectedPlace.PlaceID.ToLower()))
         .FirstOrDefault();
@@ -379,33 +385,43 @@ The Amaken Team";
     <style>
         body {{
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }}
         .container {{
             width: 80%;
             margin: auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            background-color: #ffffff;
             border-radius: 10px;
-            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }}
         .header {{
             text-align: center;
-            padding: 10px 0;
+            padding: 20px 0;
         }}
         .content {{
             margin: 20px 0;
         }}
         .footer {{
             text-align: center;
-            padding: 10px 0;
+            padding: 20px 0;
             font-size: 12px;
-            color: #888;
+            color: #888888;
+        }}
+        img {{
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px auto;
         }}
     </style>
 </head>
 <body>
     <div class='container'>
         <div class='header'>
+            <img src='https://amaken-images.fra1.digitaloceanspaces.com/Amaken%20Logo.png' alt='Amaken Logo' />
             <h1>We're Sorry</h1>
         </div>
         <div class='content'>
@@ -435,6 +451,7 @@ The Amaken Team";
         return NotFound("User or place wasn't found");
     }
 }
+
 
 
         public static string HashPassword(string password)
