@@ -7,6 +7,7 @@ namespace Amaken.Models
     public enum Private_Place_Status
     {
         OK,
+        Rejected,
         Deleted,
         Suspended,
         Unapproved

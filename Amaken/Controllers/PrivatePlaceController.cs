@@ -129,7 +129,7 @@ namespace Amaken.Controllers
         [Route("api/[controller]/SearchPrivatePlaces")]
         public IActionResult SearchPrivatePlaces()
         {
-            var PrivatePlaces = _context.Private_Place.Select(place => new
+            var PrivatePlaces = _context.Private_Place.Where(u=>u.Status.Equals("OK")).Select(place => new
                 {
                     Place = place,
                     NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())),
@@ -177,7 +177,7 @@ namespace Amaken.Controllers
         public async Task<IActionResult> GetPlaces(string id)
         {
             var placeWithRates = await _context.Private_Place
-                .Where(e => e.PlaceId.ToLower() == id.ToLower())
+                .Where(e => e.PlaceId.ToLower() == id.ToLower() && e.Status.Equals("OK"))
                 .Select(place => new
                 {
                     Place = place,

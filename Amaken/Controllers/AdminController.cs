@@ -7,6 +7,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Amaken.Controllers
@@ -129,7 +130,7 @@ namespace Amaken.Controllers
 
         [HttpPut]
         [Route("api/[controller]/ApprovePrivatePlace")]
-        public IActionResult ApprovePrivatePlace(string newPlaceId)
+        public async Task<IActionResult> ApprovePrivatePlace(string newPlaceId)
         {
             if (ModelState.IsValid)
             {
@@ -138,7 +139,34 @@ namespace Amaken.Controllers
                 {
                     PrivatePlace.Status = "OK";
                     _context.SaveChanges();
+                    await SendApprovalEmailToOwner(PrivatePlace.PlaceId);
                     return Ok("Private place is approved");
+                    
+                }
+                else
+                {
+                    return NotFound("Private place wasn't found");
+                }
+            }
+            else
+            {
+                return BadRequest("Data is invalid");
+            }
+        }
+        [HttpPut]
+        [Route("api/[controller]/RejectPrivatePlace")]
+        public async Task<IActionResult> RejectPrivatePlace([FromBody] RejectedPrivatePlace rejectedPlace)
+        {
+            if (ModelState.IsValid)
+            {
+                var PrivatePlace = _context.Private_Place.FirstOrDefault(u => u.PlaceId!.Equals(rejectedPlace.PlaceID));
+                if (PrivatePlace != null)
+                {
+                    PrivatePlace.Status = "Rejected";
+                    _context.SaveChanges();
+                    SendRejectionEmailToOwner(rejectedPlace);
+                    return Ok("Private place is rejected");
+                    
                 }
                 else
                 {
@@ -276,7 +304,44 @@ The Amaken Team";
             public string PlaceID { get; set; }
             public string RejectionReason { get; set; }
         }
+        [HttpGet]
+        [Route("api/[controller]/GetPrivatePlace")]
+        public async Task<IActionResult> GetPrivatePlace(string id)
+        {
+            var placeWithRates = await _context.Private_Place
+                .Where(e => e.PlaceId.ToLower() == id.ToLower())
+                .Select(place => new
+                {
+                    Place = place,
+                    NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower() == place.PlaceId.ToLower()),
+                    AverageScore = _context.PlacesRates
+                        .Where(r => r.PlaceId.ToLower() == place.PlaceId.ToLower())
+                        .Select(r => (double?)r.Score)
+                        .Average() ?? 0
+                })
+                .FirstOrDefaultAsync();
 
+            if (placeWithRates == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(placeWithRates);
+        }
+        [HttpGet]
+        [Route("api/[controller]/SearchPrivatePlaces")]
+        public IActionResult SearchPrivatePlaces()
+        {
+            var PrivatePlaces = _context.Private_Place.Select(place => new
+                {
+                    Place = place,
+                    NumberOfRates = _context.PlacesRates.Count(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())),
+                    AverageScore = _context.PlacesRates.Where(r => r.PlaceId.ToLower().Equals(place.PlaceId.ToLower())).Average(r => (double?)r.Score) ?? 0
+                })
+                .OrderByDescending(p => p.Place.AddedOn)
+                .ToList();
+            return Ok(PrivatePlaces);
+        }
         [HttpPost]
         [Route("api/[controller]/SendRejectionEmailToOwner")]
         public async Task<IActionResult> SendRejectionEmailToOwner([FromBody] RejectedPrivatePlace RejectedPlace)

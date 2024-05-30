@@ -68,8 +68,8 @@ public class OpenAIController : Controller
         try
         {
             var imageUrl = await GenerateImageAsync(prompt);
-
-            return Ok(imageUrl);
+            var lastImageUrl = await UploadImage(imageUrl);
+            return Ok(lastImageUrl);
         }
         catch (Exception ex)
         {
