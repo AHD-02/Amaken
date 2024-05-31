@@ -38,12 +38,10 @@ namespace Amaken.Models
         
         [Required]
         public double Latitude { get; set; }
-        
-        [Required]
-        public DateTime AvailableFrom { get; set; }
 
-        [Required]
-        public DateTime AvailableTo { get; set; }
+        public DateTime? AvailableFrom { get; set; } 
+
+        public DateTime? AvailableTo { get; set; } 
 
 
 

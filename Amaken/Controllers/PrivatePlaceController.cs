@@ -38,10 +38,13 @@ namespace Amaken.Controllers
                 var MyUser = _context.User.FirstOrDefault(u => u.Email!.Equals(userEmail));
                 if (MyUser != null)
                 {
-                    
                 myPrivate_Place.AddedOn = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
                 myPrivate_Place.Status = "Unapproved";
                 myPrivate_Place.UserEmail = MyUser.Email;
+                myPrivate_Place.AvailableFrom ??= DateTime.Now.Add(TimeSpan.FromDays(1));
+                myPrivate_Place.AvailableTo ??= DateTime.Now.Add(TimeSpan.FromDays(2));
+                myPrivate_Place.AvailableFrom = DateTime.SpecifyKind((DateTime)myPrivate_Place.AvailableFrom, DateTimeKind.Utc);
+                myPrivate_Place.AvailableTo = DateTime.SpecifyKind((DateTime)myPrivate_Place.AvailableTo, DateTimeKind.Utc);
                 int lastId = GetLastId();
                 myPrivate_Place.PlaceId = $"Private-{lastId + 1}";
                 _context.Private_Place.Add(myPrivate_Place);
@@ -99,8 +102,6 @@ namespace Amaken.Controllers
                 if (PrivatePlace != null)
                 {
                     updatedPlace.AddedOn = DateTime.SpecifyKind(updatedPlace.AddedOn, DateTimeKind.Utc);
-                    updatedPlace.AvailableFrom = DateTime.SpecifyKind(updatedPlace.AvailableFrom, DateTimeKind.Utc);
-                    updatedPlace.AvailableTo = DateTime.SpecifyKind(updatedPlace.AvailableTo, DateTimeKind.Utc);
                     PrivatePlace.UserEmail = updatedPlace.UserEmail;
                     PrivatePlace.Longitude = updatedPlace.Longitude;
                     PrivatePlace.Latitude = updatedPlace.Latitude;
