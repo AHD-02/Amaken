@@ -72,7 +72,7 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid user data");
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/TriggerReservationStatus")]
         public IActionResult TriggerReservationStatus(string myReservationId, string newStatus)
         {
@@ -104,7 +104,7 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid user data");
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/UpdateReservation")]
         public IActionResult UpdateReservation([FromBody] Reservation myReservation)
         {

@@ -59,7 +59,7 @@ namespace Amaken.Controllers
             }
             else return BadRequest("Data is invalid");
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/UpdateEvent")]
         public IActionResult UpdateEvent([FromBody] Event updatedEvent)
         {
@@ -92,7 +92,7 @@ namespace Amaken.Controllers
             }
             else return BadRequest("Data is invalid");
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/TriggerEventStatus")]
         public IActionResult TriggerEventStatus(string EventId, string newStatus)
         {

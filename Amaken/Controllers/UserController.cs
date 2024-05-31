@@ -154,7 +154,7 @@ The Amaken Team";
             }
 
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/Update")]
         public IActionResult UpdateUser([FromBody] User newUser)
         {
@@ -222,7 +222,7 @@ The Amaken Team";
             public string label { get; set; }
         }
         
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/TriggerUserStatus")]
         public IActionResult TriggerUserStatus (string email, string newStatus)
         {

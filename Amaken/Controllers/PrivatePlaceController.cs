@@ -59,7 +59,7 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid data");
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/TriggerPriavtePlaceStatus")]
         public IActionResult TriggerPriavtePlaceStatus(string id, string status)
         {
@@ -89,7 +89,7 @@ namespace Amaken.Controllers
                 return BadRequest("Invalid data");
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/UpdatePriavtePlace")]
         public IActionResult UpdatePriavtePlace([FromBody] Private_Place updatedPlace)
         {

@@ -71,7 +71,7 @@ namespace Amaken.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/UpdateAdmin")]
         public IActionResult UpdateAdmin([FromBody] Admin admin)
         {
@@ -97,7 +97,7 @@ namespace Amaken.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/TriggerAdminStatus")]
         public IActionResult TriggerAdminStatus(string email, string status)
         {
@@ -128,7 +128,7 @@ namespace Amaken.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/ApprovePrivatePlace/{newPlaceId}")]
         public async Task<IActionResult> ApprovePrivatePlace(string newPlaceId)
         {
@@ -153,7 +153,7 @@ namespace Amaken.Controllers
                 return BadRequest("Data is invalid");
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route("api/[controller]/RejectPrivatePlace")]
         public async Task<IActionResult> RejectPrivatePlace([FromBody] RejectedPrivatePlace rejectedPlace)
         {
